@@ -1,0 +1,5 @@
+{
+  "Parameters": {
+    "ClusterName": "ecs-workshop-cluster"
+  }
+}
