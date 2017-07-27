@@ -26,6 +26,9 @@ Parameters:
   TemplatesBucket:
     Description: S3 bucket to which nested CF templates are synced
     Type: String
+  StackPrefix:
+    Description: Stack Prefix
+    Type: String
   GitHubRepoOwner:
     Description: The repository owner
     Type: String
@@ -99,7 +102,7 @@ Resources:
                 Provider: CodeBuild
                 Version: '1'
               Configuration:
-                ProjectName: ecs-workshop-lz
+                ProjectName: !Sub ${StackPrefix}-ecs-workshop-lz
               RunOrder: '1'    
         - Name: ChangeSetExecution
           Actions:
@@ -115,7 +118,7 @@ Resources:
                 Capabilities: CAPABILITY_NAMED_IAM
                 ActionMode: CHANGE_SET_REPLACE
                 RoleArn: !GetAtt CFNRole.Arn
-                StackName: ecs-workshop-lz
+                StackName: !Sub ${StackPrefix}-ecs-workshop-lz
                 ChangeSetName: !Ref ChangeSetName
                 TemplateConfiguration: !Sub "GitHubArtifact::cf-templates/landingzone/config_params.json"
                 TemplatePath: !Sub "GitHubArtifact::cf-templates/network/network.yml"
@@ -128,7 +131,7 @@ Resources:
                 Version: '1'
               Configuration:
                 NotificationArn: !Ref CodePipelineSNSTopic
-                CustomData: !Sub 'A new change set was created for the ecs-workshop-lz stack. Do you want to implement the changes?'
+                CustomData: !Sub 'A new change set was created for the ${StackPrefix}-ecs-workshop-lz stack. Do you want to implement the changes?'
               RunOrder: '2'
             - Name: ExecuteChangeSet
               ActionTypeId:
@@ -141,7 +144,7 @@ Resources:
                 ActionMode: CHANGE_SET_EXECUTE
                 ChangeSetName: !Ref ChangeSetName
                 RoleArn: !GetAtt CFNRole.Arn
-                StackName: ecs-workshop-lz
+                StackName: !Sub ${StackPrefix}-ecs-workshop-lz
               RunOrder: '3'
         - Name: ChangeSetExecutionForECSCluster
           Actions:
@@ -189,7 +192,7 @@ Resources:
   CodeBuildDev:
     Type: AWS::CodeBuild::Project
     Properties:
-      Description: ecs-workshop-lz-codebuild
+      Description: !Sub ${StackPrefix}-ecs-workshop-lz-codebuild
       ServiceRole:
         Fn::GetAtt:
         - CodeBuildRole
@@ -198,7 +201,7 @@ Resources:
       - Key: creator
         Value: codepipeline
       - Key: purpose
-        Value: ecs-workshop-lz
+        Value: !Sub ${StackPrefix}-ecs-workshop-lz
       Artifacts:
         Type: CODEPIPELINE
       TimeoutInMinutes: 60
@@ -211,8 +214,7 @@ Resources:
           Value: !Ref TemplatesBucket
       Source:
         Type: CODEPIPELINE
-      Name: ecs-workshop-lz
-  
+      Name: !Sub ${StackPrefix}-ecs-workshop-lz
   CFNRole:
     Type: AWS::IAM::Role
     Properties:
@@ -263,7 +265,7 @@ Resources:
         Version: '2012-10-17'
       Path: /
       Policies:
-        - PolicyName: !Sub ecs-workshop-lz-Pipeline
+        - PolicyName: !Sub ${StackPrefix}-ecs-workshop-lz-Pipeline
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
