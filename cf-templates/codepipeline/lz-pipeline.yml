@@ -13,6 +13,7 @@ Metadata:
           - Label:
               default: "Repository Details"
             Parameters:
+              - GitHubRepoOwner
               - RepositoryName
               - BranchName
           - Label:
@@ -25,11 +26,17 @@ Parameters:
   TemplatesBucket:
     Description: S3 bucket to which nested CF templates are synced
     Type: String
+  GitHubRepoOwner:
+    Description: The repository owner
+    Type: String
   RepositoryName:
     Description: Repository Name in CodeCommit where nested and child cf-templates reside
     Type: String
   BranchName:
     Description: Repository Branch Name of RepositoryName
+    Type: String
+  OAuthToken:
+    Description: OAuthToken used to authenticate with GitHub
     Type: String
   Email:
     Description: Email for manual approval of ChangeSet
@@ -43,7 +50,7 @@ Resources:
     Type: AWS::S3::Bucket
     DeletionPolicy: Retain
     Properties:
-      BucketName:  flux7-ecs-workshop-pipeline
+      BucketName:  flux7-ecs-workshop
       VersioningConfiguration:
         Status: Enabled
   
@@ -62,7 +69,7 @@ Resources:
         Location: !Ref ArtifactStoreBucket
         Type: S3
       DisableInboundStageTransitions: []
-      Name: ECS-WORKSHOP
+      Name: ecs-workshop
       RoleArn: !GetAtt [PipelineRole, Arn]
       Stages:
         - Name: FetchfromCodeCommit
@@ -70,20 +77,22 @@ Resources:
             - Name: TemplateSource
               ActionTypeId:
                 Category: Source
-                Owner: AWS
-                Provider: CodeCommit
+                Owner: ThirdParty
+                Provider: GitHub
                 Version: '1'
               Configuration:
-                RepositoryName: !Ref RepositoryName
-                BranchName: !Ref BranchName
+                Owner: !Ref GitHubRepoOwner
+                Repo: !Ref RepositoryName
+                Branch: !Ref BranchName
+                OAuthToken: !Ref OAuthToken
               OutputArtifacts:
-                - Name: CodeCommitArtifact
+                - Name: GitHubArtifact
               RunOrder: '1'
         - Name: SyncRepowithS3
           Actions:
             - Name: CodeBuild
               InputArtifacts:
-                - Name: CodeCommitArtifact
+                - Name: GitHubArtifact
               ActionTypeId:
                 Category: Build
                 Owner: AWS
@@ -101,15 +110,15 @@ Resources:
                 Provider: CloudFormation
                 Version: '1'
               InputArtifacts:
-                - Name: CodeCommitArtifact
+                - Name: GitHubArtifact
               Configuration:
                 Capabilities: CAPABILITY_NAMED_IAM
                 ActionMode: CHANGE_SET_REPLACE
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: ecs-workshop-lz
                 ChangeSetName: !Ref ChangeSetName
-                TemplateConfiguration: !Sub "CodeCommitArtifact::cf-templates/network/config_params.json"
-                TemplatePath: !Sub "CodeCommitArtifact::cf-templates/network/network.yml"
+                TemplateConfiguration: !Sub "GitHubArtifact::cf-templates/landingzone/config_params.json"
+                TemplatePath: !Sub "GitHubArtifact::cf-templates/network/network.yml"
               RunOrder: '1'
             - Name: ApproveChangeSet
               ActionTypeId:
@@ -143,15 +152,15 @@ Resources:
                 Provider: CloudFormation
                 Version: '1'
               InputArtifacts:
-                - Name: CodeCommitArtifact
+                - Name: GitHubArtifact
               Configuration:
                 Capabilities: CAPABILITY_NAMED_IAM
                 ActionMode: CHANGE_SET_REPLACE
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: ecs-workshop-ecs-cluster
                 ChangeSetName: !Ref ChangeSetName
-                TemplateConfiguration: !Sub "CodeCommitArtifact::cf-templates/ecs/config_params.json"
-                TemplatePath: !Sub "CodeCommitArtifact::cf-templates/ecs/ecs.yml"
+                TemplateConfiguration: !Sub "GitHubArtifact::cf-templates/ecs/config_params.json"
+                TemplatePath: !Sub "GitHubArtifact::cf-templates/ecs/ecs.yml"
               RunOrder: '1'
             - Name: ApproveChangeSetECSCluster
               ActionTypeId:
