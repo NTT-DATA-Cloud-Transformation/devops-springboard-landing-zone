@@ -1,0 +1,18 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'CloudFormation template for deploying ECS cluster'
+# TODO:
+# 1. Create ECS cluster
+# 2. Create ALB
+# 3. Launch seed service
+
+Parameters:
+  ClusterName:
+    Type: String
+    Description: The ECS Cluster name
+
+Resources:
+  ECSCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Ref ClusterName

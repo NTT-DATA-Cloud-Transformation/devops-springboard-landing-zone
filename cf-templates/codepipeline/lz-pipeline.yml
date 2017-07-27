@@ -1,0 +1,292 @@
+Description: 'CodePipeline Stack for Cloudformation Stacks Continuous Delivery'
+Metadata:
+    Stack: 3
+    VersionDate: 2017-07-26
+    Input:
+      Description: "AWS Codepipeline for Cloudformation Stack Continuous Delivery"
+    "AWS::CloudFormation::Interface":
+        ParameterGroups:
+          - Label:
+              default: "CodePipeline Configuration"
+            Parameters:
+              - TemplatesBucket
+          - Label:
+              default: "Repository Details"
+            Parameters:
+              - GitHubRepoOwner
+              - RepositoryName
+              - BranchName
+          - Label:
+              default: "ChangeSet details"
+            Parameters:
+              - ChangeSetName
+              - Email
+
+Parameters:
+  TemplatesBucket:
+    Description: S3 bucket to which nested CF templates are synced
+    Type: String
+  GitHubRepoOwner:
+    Description: The repository owner
+    Type: String
+  RepositoryName:
+    Description: Repository Name in CodeCommit where nested and child cf-templates reside
+    Type: String
+  BranchName:
+    Description: Repository Branch Name of RepositoryName
+    Type: String
+  OAuthToken:
+    Description: OAuthToken used to authenticate with GitHub
+    Type: String
+  Email:
+    Description: Email for manual approval of ChangeSet
+    Type: String
+  ChangeSetName:
+    Description: Name for the Changeset
+    Type: String
+
+Resources:
+  ArtifactStoreBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    Properties:
+      BucketName:  flux7-ecs-workshop
+      VersioningConfiguration:
+        Status: Enabled
+  
+  CodePipelineSNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: ECS-Workshop-Alerts
+      Subscription:
+        - Endpoint: !Ref Email
+          Protocol: email
+
+  Pipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      ArtifactStore:
+        Location: !Ref ArtifactStoreBucket
+        Type: S3
+      DisableInboundStageTransitions: []
+      Name: ecs-workshop
+      RoleArn: !GetAtt [PipelineRole, Arn]
+      Stages:
+        - Name: FetchfromCodeCommit
+          Actions:
+            - Name: TemplateSource
+              ActionTypeId:
+                Category: Source
+                Owner: ThirdParty
+                Provider: GitHub
+                Version: '1'
+              Configuration:
+                Owner: !Ref GitHubRepoOwner
+                Repo: !Ref RepositoryName
+                Branch: !Ref BranchName
+                OAuthToken: !Ref OAuthToken
+              OutputArtifacts:
+                - Name: GitHubArtifact
+              RunOrder: '1'
+        - Name: SyncRepowithS3
+          Actions:
+            - Name: CodeBuild
+              InputArtifacts:
+                - Name: GitHubArtifact
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: '1'
+              Configuration:
+                ProjectName: ecs-workshop-lz
+              RunOrder: '1'    
+        - Name: ChangeSetExecution
+          Actions:
+            - Name: CreateChangeSet
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: '1'
+              InputArtifacts:
+                - Name: GitHubArtifact
+              Configuration:
+                Capabilities: CAPABILITY_NAMED_IAM
+                ActionMode: CHANGE_SET_REPLACE
+                RoleArn: !GetAtt CFNRole.Arn
+                StackName: ecs-workshop-lz
+                ChangeSetName: !Ref ChangeSetName
+                TemplateConfiguration: !Sub "GitHubArtifact::cf-templates/landingzone/config_params.json"
+                TemplatePath: !Sub "GitHubArtifact::cf-templates/network/network.yml"
+              RunOrder: '1'
+            - Name: ApproveChangeSet
+              ActionTypeId:
+                Category: Approval
+                Owner: AWS
+                Provider: Manual
+                Version: '1'
+              Configuration:
+                NotificationArn: !Ref CodePipelineSNSTopic
+                CustomData: !Sub 'A new change set was created for the ecs-workshop-lz stack. Do you want to implement the changes?'
+              RunOrder: '2'
+            - Name: ExecuteChangeSet
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: '1'
+              Configuration:
+                Capabilities: CAPABILITY_NAMED_IAM
+                ActionMode: CHANGE_SET_EXECUTE
+                ChangeSetName: !Ref ChangeSetName
+                RoleArn: !GetAtt CFNRole.Arn
+                StackName: ecs-workshop-lz
+              RunOrder: '3'
+        - Name: ChangeSetExecutionForECSCluster
+          Actions:
+            - Name: CreateChangeSetECSCluster
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: '1'
+              InputArtifacts:
+                - Name: GitHubArtifact
+              Configuration:
+                Capabilities: CAPABILITY_NAMED_IAM
+                ActionMode: CHANGE_SET_REPLACE
+                RoleArn: !GetAtt CFNRole.Arn
+                StackName: ecs-workshop-ecs-cluster
+                ChangeSetName: !Ref ChangeSetName
+                TemplateConfiguration: !Sub "GitHubArtifact::cf-templates/ecs/config_params.json"
+                TemplatePath: !Sub "GitHubArtifact::cf-templates/ecs/ecs.yml"
+              RunOrder: '1'
+            - Name: ApproveChangeSetECSCluster
+              ActionTypeId:
+                Category: Approval
+                Owner: AWS
+                Provider: Manual
+                Version: '1'
+              Configuration:
+                NotificationArn: !Ref CodePipelineSNSTopic
+                CustomData: !Sub 'A new change set was created for the ecs-workshop-ecs-cluster stack. Do you want to implement the changes?'
+              RunOrder: '2'
+            - Name: ExecuteChangeSetEcsCluster
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: '1'
+              Configuration:
+                Capabilities: CAPABILITY_NAMED_IAM
+                ActionMode: CHANGE_SET_EXECUTE
+                ChangeSetName: !Ref ChangeSetName
+                RoleArn: !GetAtt CFNRole.Arn
+                StackName: ecs-workshop-ecs-cluster
+              RunOrder: '3'
+  
+  CodeBuildDev:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Description: ecs-workshop-lz-codebuild
+      ServiceRole:
+        Fn::GetAtt:
+        - CodeBuildRole
+        - Arn
+      Tags:
+      - Key: creator
+        Value: codepipeline
+      - Key: purpose
+        Value: ecs-workshop-lz
+      Artifacts:
+        Type: CODEPIPELINE
+      TimeoutInMinutes: 60
+      Environment:
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/nodejs:4.3.2
+        Type: LINUX_CONTAINER
+        EnvironmentVariables:
+        - Name: TemplatesBucket
+          Value: !Ref TemplatesBucket
+      Source:
+        Type: CODEPIPELINE
+      Name: ecs-workshop-lz
+  
+  CFNRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: ['sts:AssumeRole']
+          Effect: Allow
+          Principal:
+            Service: [cloudformation.amazonaws.com]
+        Version: '2012-10-17'
+      Path: /
+      Policies:
+        - PolicyName: !Sub ecs-worksho-lz-CF
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                  - '*'
+                Effect: Allow
+                Resource: '*'
+                
+  CodeBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action: sts:AssumeRole
+          Principal:
+            AWS: "*"
+        - Effect: Allow
+          Action: sts:AssumeRole
+          Principal:
+            AWS: "*"
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/PowerUserAccess
+
+  PipelineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: ['sts:AssumeRole']
+          Effect: Allow
+          Principal:
+            Service: [codepipeline.amazonaws.com]
+        Version: '2012-10-17'
+      Path: /
+      Policies:
+        - PolicyName: !Sub ecs-workshop-lz-Pipeline
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                - 's3:*'
+                - 'codebuild:*'
+                - 'cloudformation:CreateStack'
+                - 'cloudformation:DescribeStacks'
+                - 'cloudformation:DeleteStack'
+                - 'cloudformation:UpdateStack'
+                - 'cloudformation:CreateChangeSet'
+                - 'cloudformation:ExecuteChangeSet'
+                - 'cloudformation:DeleteChangeSet'
+                - 'cloudformation:DescribeChangeSet'
+                - 'cloudformation:SetStackPolicy'
+                - 'iam:PassRole'
+                - 'sns:Publish'
+                - 'codecommit:BatchGetRepositories'
+                - 'codecommit:Get*'
+                - 'codecommit:GitPull'
+                - 'codecommit:List*'
+                - 'codecommit:Update*'
+                - 'codecommit:Test*'
+                - 'codecommit:UploadArchive'
+                Effect: Allow
+                Resource: '*'
