@@ -215,7 +215,6 @@ Resources:
       Source:
         Type: CODEPIPELINE
       Name: !Sub ${StackPrefix}-ecs-workshop-lz
-  
   CFNRole:
     Type: AWS::IAM::Role
     Properties:
