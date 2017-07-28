@@ -49,14 +49,8 @@ Parameters:
     Type: String
 
 Resources:
-  ArtifactStoreBucket:
-    Type: AWS::S3::Bucket
-    DeletionPolicy: Retain
-    Properties:
-      BucketName:  flux7-ecs-workshop
-      VersioningConfiguration:
-        Status: Enabled
-  
+  # S3 Bucket created by git2s3
+  #
   CodePipelineSNSTopic:
     Type: AWS::SNS::Topic
     Properties:
@@ -65,45 +59,91 @@ Resources:
         - Endpoint: !Ref Email
           Protocol: email
 
+  UnzipLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Role: !GetAtt UnzipLambdaRole.Arn
+      Handler: lambda_function.lambda_handler
+      MemorySize: 128
+      Runtime: python2.7
+      Timeout: 300
+      Code:
+        S3Bucket: !Ref TemplatesBucket
+        S3Key: lambda/unzip.zip
+
+  UnzipRole:
+    Type: AWS::IAM::Role
+    Version: 2012-10-17
+    Statement:
+      - 
+        Effect: Allow
+        Principal:
+          Service: lambda.amazonaws.com
+        Action: sts:AssumeRole
+        Path: /
+        Policies:
+          -
+            PolicyName: unzip-s3
+            PolicyDocument:
+              Version: 2012-10-17
+              Statement:
+                -
+                  Effect: Allow
+                  Action:
+                    - "s3:*"
+                  Resource:
+                    - !Join [ "". [ "arn:aws:s3:::", !Ref TemplatesBucket ] ]
+                    - !Join [ "". [ "arn:aws:s3:::", !Ref TemplatesBucket, "/*" ] ]
+
   Pipeline:
     Type: AWS::CodePipeline::Pipeline
     Properties:
       ArtifactStore:
-        Location: !Ref ArtifactStoreBucket
+        #EncryptionKey: !Ref KMSKeyId
+        Location: !Ref TemplatesBucket
         Type: S3
       DisableInboundStageTransitions: []
       Name: ecs-workshop
       RoleArn: !GetAtt [PipelineRole, Arn]
       Stages:
-        - Name: FetchfromCodeCommit
+        #- Name: FetchfromGitHub
+        #  Actions:
+        #    - Name: TemplateSource
+        #      ActionTypeId:
+        #        Category: Source
+        #        Owner: ThirdParty
+        #        Provider: GitHub
+        #        Version: '1'
+        #      Configuration:
+        #        Owner: !Ref GitHubRepoOwner
+        #        Repo: !Ref RepositoryName
+        #        Branch: !Ref BranchName
+        #        OAuthToken: !Ref OAuthToken
+        #      OutputArtifacts:
+        #        - Name: GitHubArtifact
+        #      RunOrder: '1'
+        - Name: git2s3
           Actions:
-            - Name: TemplateSource
+            - Name: git2s3
               ActionTypeId:
                 Category: Source
-                Owner: ThirdParty
-                Provider: GitHub
-                Version: '1'
-              Configuration:
-                Owner: !Ref GitHubRepoOwner
-                Repo: !Ref RepositoryName
-                Branch: !Ref BranchName
-                OAuthToken: !Ref OAuthToken
-              OutputArtifacts:
-                - Name: GitHubArtifact
-              RunOrder: '1'
-        - Name: SyncRepowithS3
-          Actions:
-            - Name: CodeBuild
-              InputArtifacts:
-                - Name: GitHubArtifact
-              ActionTypeId:
-                Category: Build
                 Owner: AWS
-                Provider: CodeBuild
+                Provider: S3
                 Version: '1'
               Configuration:
-                ProjectName: !Sub ${StackPrefix}-ecs-workshop-lz
-              RunOrder: '1'    
+                S3Bucket: !Ref TemplatesBucket 
+                S3ObjectKey: !Sub ${GitHubRepoOwner}/${RepositoryName}/${GitHubRepoOwner}_${RepositoryName}.zip
+              OutputArtifacts:
+                - Name: S3Artifact
+              RunOrder: '1'
+
+        - Name: Invoke Unzip
+          Actions:
+            - Name: unzip
+              ActionTypeId:
+                Category: Invoke
+                Owner: AWS
+
         - Name: ChangeSetExecution
           Actions:
             - Name: CreateChangeSet
@@ -120,8 +160,8 @@ Resources:
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: !Sub ${StackPrefix}-ecs-workshop-lz
                 ChangeSetName: !Ref ChangeSetName
-                TemplateConfiguration: !Sub "GitHubArtifact::cf-templates/landingzone/config_params.json"
-                TemplatePath: !Sub "GitHubArtifact::cf-templates/network/network.yml"
+                TemplateConfiguration: !Sub "S3Artifact::cf-templates/landingzone/config_params.json"
+                TemplatePath: !Sub "S3Artifact::cf-templates/landingzone/lz.yml"
               RunOrder: '1'
             - Name: ApproveChangeSet
               ActionTypeId:
