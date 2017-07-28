@@ -59,41 +59,6 @@ Resources:
         - Endpoint: !Ref Email
           Protocol: email
 
-  UnzipLambda:
-    Type: AWS::Lambda::Function
-    Properties:
-      Role: !GetAtt UnzipLambdaRole.Arn
-      Handler: lambda_function.lambda_handler
-      MemorySize: 128
-      Runtime: python2.7
-      Timeout: 300
-      Code:
-        S3Bucket: !Ref TemplatesBucket
-        S3Key: lambda/unzip.zip
-
-  UnzipRole:
-    Type: AWS::IAM::Role
-    Version: 2012-10-17
-    Statement:
-      - 
-        Effect: Allow
-        Principal:
-          Service: lambda.amazonaws.com
-        Action: sts:AssumeRole
-        Path: /
-        Policies:
-          -
-            PolicyName: unzip-s3
-            PolicyDocument:
-              Version: 2012-10-17
-              Statement:
-                -
-                  Effect: Allow
-                  Action:
-                    - "s3:*"
-                  Resource:
-                    - !Join [ "". [ "arn:aws:s3:::", !Ref TemplatesBucket ] ]
-                    - !Join [ "". [ "arn:aws:s3:::", !Ref TemplatesBucket, "/*" ] ]
 
   Pipeline:
     Type: AWS::CodePipeline::Pipeline
@@ -132,17 +97,10 @@ Resources:
                 Version: '1'
               Configuration:
                 S3Bucket: !Ref TemplatesBucket 
-                S3ObjectKey: !Sub ${GitHubRepoOwner}/${RepositoryName}/${GitHubRepoOwner}_${RepositoryName}.zip
+                S3ObjectKey: !Sub ${GitHubRepoOwner}/${RepositoryName}
               OutputArtifacts:
                 - Name: S3Artifact
               RunOrder: '1'
-
-        - Name: Invoke Unzip
-          Actions:
-            - Name: unzip
-              ActionTypeId:
-                Category: Invoke
-                Owner: AWS
 
         - Name: ChangeSetExecution
           Actions:
@@ -153,15 +111,15 @@ Resources:
                 Provider: CloudFormation
                 Version: '1'
               InputArtifacts:
-                - Name: GitHubArtifact
+                - Name: S3Artifact
               Configuration:
                 Capabilities: CAPABILITY_NAMED_IAM
                 ActionMode: CHANGE_SET_REPLACE
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: !Sub ${StackPrefix}-ecs-workshop-lz
                 ChangeSetName: !Ref ChangeSetName
-                TemplateConfiguration: !Sub "S3Artifact::cf-templates/landingzone/config_params.json"
-                TemplatePath: !Sub "S3Artifact::cf-templates/landingzone/lz.yml"
+                TemplateConfiguration:  "S3Artifact::cf-templates/landingzone/config_params.json"
+                TemplatePath: "S3Artifact::cf-templates/landingzone/lz.yml"
               RunOrder: '1'
             - Name: ApproveChangeSet
               ActionTypeId:
@@ -195,15 +153,15 @@ Resources:
                 Provider: CloudFormation
                 Version: '1'
               InputArtifacts:
-                - Name: GitHubArtifact
+                - Name: S3Artifact
               Configuration:
                 Capabilities: CAPABILITY_NAMED_IAM
                 ActionMode: CHANGE_SET_REPLACE
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: ecs-workshop-ecs-cluster
                 ChangeSetName: !Ref ChangeSetName
-                TemplateConfiguration: !Sub "GitHubArtifact::cf-templates/ecs/config_params.json"
-                TemplatePath: !Sub "GitHubArtifact::cf-templates/ecs/ecs.yml"
+                TemplateConfiguration:  "S3Artifact::cf-templates/ecs/config_params.json"
+                TemplatePath: !Sub "S3Artifact::cf-templates/ecs/ecs.yml"
               RunOrder: '1'
             - Name: ApproveChangeSetECSCluster
               ActionTypeId:
@@ -229,32 +187,6 @@ Resources:
                 StackName: ecs-workshop-ecs-cluster
               RunOrder: '3'
   
-  CodeBuildDev:
-    Type: AWS::CodeBuild::Project
-    Properties:
-      Description: !Sub ${StackPrefix}-ecs-workshop-lz-codebuild
-      ServiceRole:
-        Fn::GetAtt:
-        - CodeBuildRole
-        - Arn
-      Tags:
-      - Key: creator
-        Value: codepipeline
-      - Key: purpose
-        Value: !Sub ${StackPrefix}-ecs-workshop-lz
-      Artifacts:
-        Type: CODEPIPELINE
-      TimeoutInMinutes: 60
-      Environment:
-        ComputeType: BUILD_GENERAL1_SMALL
-        Image: aws/codebuild/nodejs:4.3.2
-        Type: LINUX_CONTAINER
-        EnvironmentVariables:
-        - Name: TemplatesBucket
-          Value: !Ref TemplatesBucket
-      Source:
-        Type: CODEPIPELINE
-      Name: !Sub ${StackPrefix}-ecs-workshop-lz
   CFNRole:
     Type: AWS::IAM::Role
     Properties:
@@ -276,23 +208,6 @@ Resources:
                 Effect: Allow
                 Resource: '*'
                 
-  CodeBuildRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-        - Effect: Allow
-          Action: sts:AssumeRole
-          Principal:
-            AWS: "*"
-        - Effect: Allow
-          Action: sts:AssumeRole
-          Principal:
-            AWS: "*"
-      ManagedPolicyArns:
-      - arn:aws:iam::aws:policy/PowerUserAccess
-
   PipelineRole:
     Type: AWS::IAM::Role
     Properties:
