@@ -71,37 +71,22 @@ Resources:
       Name: ecs-workshop
       RoleArn: !GetAtt [PipelineRole, Arn]
       Stages:
-        #- Name: FetchfromGitHub
-        #  Actions:
-        #    - Name: TemplateSource
-        #      ActionTypeId:
-        #        Category: Source
-        #        Owner: ThirdParty
-        #        Provider: GitHub
-        #        Version: '1'
-        #      Configuration:
-        #        Owner: !Ref GitHubRepoOwner
-        #        Repo: !Ref RepositoryName
-        #        Branch: !Ref BranchName
-        #        OAuthToken: !Ref OAuthToken
-        #      OutputArtifacts:
-        #        - Name: GitHubArtifact
-        #      RunOrder: '1'
-        - Name: git2s3
+        - Name: FetchfromGitHub
           Actions:
-            - Name: git2s3
+            - Name: TemplateSource
               ActionTypeId:
                 Category: Source
-                Owner: AWS
-                Provider: S3
+                Owner: ThirdParty
+                Provider: GitHub
                 Version: '1'
               Configuration:
-                S3Bucket: !Ref TemplatesBucket 
-                S3ObjectKey: !Sub ${GitHubRepoOwner}/${RepositoryName}
+                Owner: !Ref GitHubRepoOwner
+                Repo: !Ref RepositoryName
+                Branch: !Ref BranchName
+                OAuthToken: !Ref OAuthToken
               OutputArtifacts:
                 - Name: S3Artifact
               RunOrder: '1'
-
         - Name: ChangeSetExecution
           Actions:
             - Name: CreateChangeSet
@@ -160,8 +145,8 @@ Resources:
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: ecs-workshop-ecs-cluster
                 ChangeSetName: !Ref ChangeSetName
-                TemplateConfiguration:  "S3Artifact::cf-templates/ecs/config_params.json"
-                TemplatePath: !Sub "S3Artifact::cf-templates/ecs/ecs.yml"
+                TemplateConfiguration:  "S3Artifact::cf-templates/ecs-cluster/config_params.json"
+                TemplatePath: "S3Artifact::cf-templates/ecs-cluster/ecs.yml"
               RunOrder: '1'
             - Name: ApproveChangeSetECSCluster
               ActionTypeId:
