@@ -171,7 +171,6 @@ Resources:
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: ecs-workshop-ecs-cluster
               RunOrder: '3'
-  
   CFNRole:
     Type: AWS::IAM::Role
     Properties:
