@@ -49,13 +49,6 @@ Parameters:
     Type: String
 
 Resources:
-  ArtifactStoreBucket:
-    Type: AWS::S3::Bucket
-    DeletionPolicy: Retain
-    Properties:
-      BucketName:  flux7-ecs-workshop
-      VersioningConfiguration:
-        Status: Enabled
   
   CodePipelineSNSTopic:
     Type: AWS::SNS::Topic
