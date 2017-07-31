@@ -75,27 +75,26 @@ Resources:
       Name: ecs-workshop
       RoleArn: !GetAtt [PipelineRole, Arn]
       Stages:
-        - Name: FetchfromCodeCommit
+        - Name: FetchfromS3
           Actions:
             - Name: TemplateSource
               ActionTypeId:
                 Category: Source
-                Owner: ThirdParty
-                Provider: GitHub
+                Owner: AWS
+                Provider: S3
                 Version: '1'
               Configuration:
-                Owner: !Ref GitHubRepoOwner
-                Repo: !Ref RepositoryName
-                Branch: !Ref BranchName
-                OAuthToken: !Ref OAuthToken
+                S3Bucket: !Ref TemplatesBucket
+                S3ObjectKey: !Sub ${GitHubRepoOwner}/${RepositoryName}/${GitHubRepoOwner}_${RepositoryName}.zip
+                PollForSourceChanges: true
               OutputArtifacts:
-                - Name: GitHubArtifact
+                - Name: S3Artifact
               RunOrder: '1'
-        - Name: SyncRepowithS3
+        - Name: SyncRepoS3
           Actions:
             - Name: CodeBuild
               InputArtifacts:
-                - Name: GitHubArtifact
+                - Name: S3Artifact
               ActionTypeId:
                 Category: Build
                 Owner: AWS
@@ -103,6 +102,8 @@ Resources:
                 Version: '1'
               Configuration:
                 ProjectName: !Sub ${StackPrefix}-ecs-workshop-lz
+              OutputArtifacts:
+                - Name: S3Artifact
               RunOrder: '1'    
         - Name: ChangeSetExecution
           Actions:
