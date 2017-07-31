@@ -62,7 +62,7 @@ Resources:
     Type: AWS::CodePipeline::Pipeline
     Properties:
       ArtifactStore:
-        Location: !Ref ArtifactStoreBucket
+        Location: !Ref TemplatesBucket
         Type: S3
       DisableInboundStageTransitions: []
       Name: ecs-workshop
@@ -81,13 +81,13 @@ Resources:
                 S3ObjectKey: !Sub ${GitHubRepoOwner}/${RepositoryName}/${GitHubRepoOwner}_${RepositoryName}.zip
                 PollForSourceChanges: true
               OutputArtifacts:
-                - Name: S3Artifact
+                - Name: GitArtifact
               RunOrder: '1'
         - Name: SyncRepoS3
           Actions:
             - Name: CodeBuild
               InputArtifacts:
-                - Name: S3Artifact
+                - Name: GitArtifact
               ActionTypeId:
                 Category: Build
                 Owner: AWS
@@ -107,15 +107,15 @@ Resources:
                 Provider: CloudFormation
                 Version: '1'
               InputArtifacts:
-                - Name: GitHubArtifact
+                - Name: S3Artifact
               Configuration:
                 Capabilities: CAPABILITY_NAMED_IAM
                 ActionMode: CHANGE_SET_REPLACE
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: !Sub ${StackPrefix}-ecs-workshop-lz
                 ChangeSetName: !Ref ChangeSetName
-                TemplateConfiguration: !Sub "GitHubArtifact::cf-templates/landingzone/config_params.json"
-                TemplatePath: !Sub "GitHubArtifact::cf-templates/network/network.yml"
+                TemplateConfiguration: S3Artifact::cf-templates/landingzone/config_params.json"
+                TemplatePath: S3Artifact::cf-templates/network/network.yml"
               RunOrder: '1'
             - Name: ApproveChangeSet
               ActionTypeId:
@@ -149,15 +149,15 @@ Resources:
                 Provider: CloudFormation
                 Version: '1'
               InputArtifacts:
-                - Name: GitHubArtifact
+                - Name: S3Artifact
               Configuration:
                 Capabilities: CAPABILITY_NAMED_IAM
                 ActionMode: CHANGE_SET_REPLACE
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: ecs-workshop-ecs-cluster
                 ChangeSetName: !Ref ChangeSetName
-                TemplateConfiguration: !Sub "GitHubArtifact::cf-templates/ecs/config_params.json"
-                TemplatePath: !Sub "GitHubArtifact::cf-templates/ecs/ecs.yml"
+                TemplateConfiguration: S3Artifact::cf-templates/ecs/config_params.json"
+                TemplatePath: S3Artifact::cf-templates/ecs/ecs.yml"
               RunOrder: '1'
             - Name: ApproveChangeSetECSCluster
               ActionTypeId:
@@ -206,8 +206,13 @@ Resources:
         EnvironmentVariables:
         - Name: TemplatesBucket
           Value: !Ref TemplatesBucket
+        - Name: GitHubRepoOwner
+          Value: !Ref GitHubRepoOwner
+        - Name: RepositoryName
+          Value: !Ref RepositoryName
       Source:
         Type: CODEPIPELINE
+        BuildSpec: cd "$(ls -t1 -d ${GitHubRepoOwner}*/ | head -n1)"; aws sync . s3://${TemplatesBucket}/ecs-workshop
       Name: !Sub ${StackPrefix}-ecs-workshop-lz
   CFNRole:
     Type: AWS::IAM::Role
