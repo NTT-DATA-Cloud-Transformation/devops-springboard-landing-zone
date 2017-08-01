@@ -78,26 +78,26 @@ Resources:
                 Version: '1'
               Configuration:
                 S3Bucket: !Ref TemplatesBucket
-                S3ObjectKey: !Sub ${RepositoryName}/${GitHubRepoOwner}-${RepositoryName}.zip
+                S3ObjectKey: !Sub ${RepositoryName}-test
                 PollForSourceChanges: true
               OutputArtifacts:
                 - Name: GitArtifact
               RunOrder: '1'
-        - Name: SyncRepoS3
-          Actions:
-            - Name: CodeBuild
-              InputArtifacts:
-                - Name: GitArtifact
-              ActionTypeId:
-                Category: Build
-                Owner: AWS
-                Provider: CodeBuild
-                Version: '1'
-              Configuration:
-                ProjectName: !Sub ${StackPrefix}-ecs-workshop-lz
-              OutputArtifacts:
-                - Name: BuildArtifact
-              RunOrder: '1'    
+          #- Name: SyncRepoS3
+          #- Actions:
+          #-   - Name: CodeBuild
+          #-     InputArtifacts:
+          #-       - Name: GitArtifact
+          #-     ActionTypeId:
+          #-       Category: Build
+          #-       Owner: AWS
+          #-       Provider: CodeBuild
+          #-       Version: '1'
+          #-     Configuration:
+          #-       ProjectName: !Sub ${StackPrefix}-ecs-workshop-lz
+          #-     OutputArtifacts:
+          #-       - Name: BuildArtifact
+          #-     RunOrder: '1'    
         - Name: ChangeSetExecution
           Actions:
             - Name: CreateChangeSet
@@ -114,8 +114,8 @@ Resources:
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: !Sub ${StackPrefix}-ecs-workshop-lz
                 ChangeSetName: !Ref ChangeSetName
-                TemplateConfiguration: BuildArtifact::cf-templates/landingzone/config_params.json"
-                TemplatePath: BuildArtifact::cf-templates/landingzone/lz.yml"
+                TemplateConfiguration: GitArtifact::cf-templates/landingzone/config_params.json"
+                TemplatePath: GitArtifact::cf-templates/landingzone/lz.yml"
               RunOrder: '1'
             - Name: ApproveChangeSet
               ActionTypeId:
