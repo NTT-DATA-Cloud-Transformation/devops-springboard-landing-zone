@@ -42,6 +42,7 @@ Resources:
             Fn::Sub: "${StackPrefix}-Public-Subnet-0"
         - !ImportValue
             Fn::Sub: "${StackPrefix}-Public-Subnet-1"
+      #Target Groups
       Listeners:
         - InstancePort: 80
           LoadBalancerPort: 80
