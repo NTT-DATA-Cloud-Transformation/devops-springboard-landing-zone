@@ -114,8 +114,8 @@ Resources:
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: !Sub ${StackPrefix}-ecs-workshop-lz
                 ChangeSetName: !Ref ChangeSetName
-                TemplateConfiguration: GitArtifact::cf-templates/landingzone/config_params.json"
-                TemplatePath: GitArtifact::cf-templates/landingzone/lz.yml"
+                TemplateConfiguration: BuildArtifact::cf-templates/landingzone/config_params.json"
+                TemplatePath: BuildArtifact::cf-templates/landingzone/lz.yml"
               RunOrder: '1'
             - Name: ApproveChangeSet
               ActionTypeId:
