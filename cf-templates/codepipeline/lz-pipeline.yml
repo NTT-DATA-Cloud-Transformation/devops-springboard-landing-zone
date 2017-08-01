@@ -65,7 +65,7 @@ Resources:
         Location: !Ref TemplatesBucket
         Type: S3
       DisableInboundStageTransitions: []
-      Name: ecs-workshop
+      Name: ecs-workshop-pipeline
       RoleArn: !GetAtt [PipelineRole, Arn]
       Stages:
         - Name: FetchfromS3
@@ -78,7 +78,7 @@ Resources:
                 Version: '1'
               Configuration:
                 S3Bucket: !Ref TemplatesBucket
-                S3ObjectKey: !Sub ${RepositoryName}-test
+                S3ObjectKey: !Sub ${RepositoryName}/${GitHubRepoOwner}-${RepositoryName}.zip
                 PollForSourceChanges: true
               OutputArtifacts:
                 - Name: GitArtifact
@@ -114,8 +114,8 @@ Resources:
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: !Sub ${StackPrefix}-ecs-workshop-lz
                 ChangeSetName: !Ref ChangeSetName
-                TemplateConfiguration: GitArtifact::cf-templates/landingzone/config_params.json"
-                TemplatePath: GitArtifact::cf-templates/landingzone/lz.yml"
+                TemplateConfiguration: GitArtifact::cf-templates/landingzone/config_params.json
+                TemplatePath: GitArtifact::cf-templates/landingzone/lz.yml
               RunOrder: '1'
             - Name: ApproveChangeSet
               ActionTypeId:
@@ -156,8 +156,8 @@ Resources:
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: ecs-workshop-ecs-cluster
                 ChangeSetName: !Ref ChangeSetName
-                TemplateConfiguration: GitArtifact::cf-templates/ecs/config_params.json"
-                TemplatePath: GitArtifact::cf-templates/ecs/ecs.yml"
+                TemplateConfiguration: GitArtifact::cf-templates/ecs-cluster/config_params.json
+                TemplatePath: GitArtifact::cf-templates/ecs-cluster/ecs.yml
               RunOrder: '1'
             - Name: ApproveChangeSetECSCluster
               ActionTypeId:
