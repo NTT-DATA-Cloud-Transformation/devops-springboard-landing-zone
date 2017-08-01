@@ -39,9 +39,9 @@ Resources:
         Timeout: 60
       Subnets:
         - !ImportValue
-            Fn::Sub "${StackPrefix}-Public-Subnet-0"
+            Fn::Sub: "${StackPrefix}-Public-Subnet-0"
         - !ImportValue
-            Fn::Sub "${StackPrefix}-Public-Subnet-1"
+            Fn::Sub: "${StackPrefix}-Public-Subnet-1"
       Listeners:
         - InstancePort: 80
           LoadBalancerPort: 80
