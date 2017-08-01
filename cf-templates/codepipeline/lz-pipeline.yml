@@ -107,15 +107,15 @@ Resources:
                 Provider: CloudFormation
                 Version: '1'
               InputArtifacts:
-                - Name: BuildArtifact
+                - Name: GitArtifact
               Configuration:
                 Capabilities: CAPABILITY_NAMED_IAM
                 ActionMode: CHANGE_SET_REPLACE
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: !Sub ${StackPrefix}-ecs-workshop-lz
                 ChangeSetName: !Ref ChangeSetName
-                TemplateConfiguration: BuildArtifact::cf-templates/landingzone/config_params.json"
-                TemplatePath: BuildArtifact::cf-templates/landingzone/lz.yml"
+                TemplateConfiguration: GitArtifact::cf-templates/landingzone/config_params.json"
+                TemplatePath: GitArtifact::cf-templates/landingzone/lz.yml"
               RunOrder: '1'
             - Name: ApproveChangeSet
               ActionTypeId:
