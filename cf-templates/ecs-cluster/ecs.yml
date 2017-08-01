@@ -38,9 +38,9 @@ Resources:
         Enabled: true
         Timeout: 60
       Subnets:
-        - Fn::ImportValue:
+      - Fn::ImportValue:
           !Sub ${StackPrefix}-Public-Subnet-0 
-        - Fn::ImportValue:
+      - Fn::ImportValue:
           !Sub ${StackPrefix}-Public-Subnet-1 
       Listeners:
         - InstancePort: 80
