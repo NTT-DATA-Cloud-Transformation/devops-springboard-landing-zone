@@ -78,7 +78,7 @@ Resources:
                 Version: '1'
               Configuration:
                 S3Bucket: !Ref TemplatesBucket
-                S3ObjectKey: !Sub ${GitHubRepoOwner}/${RepositoryName}/${GitHubRepoOwner}_${RepositoryName}.zip
+                S3ObjectKey: !Sub ${RepositoryName}
                 PollForSourceChanges: true
               OutputArtifacts:
                 - Name: GitArtifact
@@ -107,15 +107,15 @@ Resources:
                 Provider: CloudFormation
                 Version: '1'
               InputArtifacts:
-                - Name: BuildArtifact
+                - Name: GitArtifact
               Configuration:
                 Capabilities: CAPABILITY_NAMED_IAM
                 ActionMode: CHANGE_SET_REPLACE
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: !Sub ${StackPrefix}-ecs-workshop-lz
                 ChangeSetName: !Ref ChangeSetName
-                TemplateConfiguration: BuildArtifact::cf-templates/landingzone/config_params.json"
-                TemplatePath: BuildArtifact::cf-templates/network/network.yml"
+                TemplateConfiguration: GitArtifact::cf-templates/landingzone/config_params.json"
+                TemplatePath: GitArtifact::cf-templates/network/network.yml"
               RunOrder: '1'
             - Name: ApproveChangeSet
               ActionTypeId:
@@ -149,15 +149,15 @@ Resources:
                 Provider: CloudFormation
                 Version: '1'
               InputArtifacts:
-                - Name: BuildArtifact
+                - Name: GitArtifact
               Configuration:
                 Capabilities: CAPABILITY_NAMED_IAM
                 ActionMode: CHANGE_SET_REPLACE
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: ecs-workshop-ecs-cluster
                 ChangeSetName: !Ref ChangeSetName
-                TemplateConfiguration: BuildArtifact::cf-templates/ecs/config_params.json"
-                TemplatePath: BuildArtifact::cf-templates/ecs/ecs.yml"
+                TemplateConfiguration: GitArtifact::cf-templates/ecs/config_params.json"
+                TemplatePath: GitArtifact::cf-templates/ecs/ecs.yml"
               RunOrder: '1'
             - Name: ApproveChangeSetECSCluster
               ActionTypeId:
@@ -213,7 +213,7 @@ Resources:
       Source:
         Type: CODEPIPELINE
         BuildSpec:
-          "version: 0.2\n\nphases:\n  build:\n    commands:\n      - echo Build started on `date`\n      - ls\n      - aws s3 sync \"$(ls -t1 -d ${GitHubRepoOwner}-*/ | head -n1)\" s3://${TemplatesBucket}/ecs-workshop-lz\nartifacts:\n  files:\n    - '**/*'\n  base-directory: Flux7Labs*" 
+          "version: 0.2\n\nphases:\n  build:\n    commands:\n      - echo Build started on `date`\n      - ls\n      - aws s3 sync . s3://${TemplatesBucket}/ecs-workshop-lz\n" 
       Name: !Sub ${StackPrefix}-ecs-workshop-lz
 
   CFNRole:
