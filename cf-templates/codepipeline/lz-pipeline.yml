@@ -117,16 +117,16 @@ Resources:
                 TemplateConfiguration: GitArtifact::cf-templates/landingzone/config_params.json
                 TemplatePath: GitArtifact::cf-templates/landingzone/lz.yml
               RunOrder: '1'
-            - Name: ApproveChangeSet
-              ActionTypeId:
-                Category: Approval
-                Owner: AWS
-                Provider: Manual
-                Version: '1'
-              Configuration:
-                NotificationArn: !Ref CodePipelineSNSTopic
-                CustomData: !Sub 'A new change set was created for the ${StackPrefix}-ecs-workshop-lz stack. Do you want to implement the changes?'
-              RunOrder: '2'
+              #- Name: ApproveChangeSet
+              #- ActionTypeId:
+              #-   Category: Approval
+              #-   Owner: AWS
+              #-   Provider: Manual
+              #-   Version: '1'
+              #- Configuration:
+              #-   NotificationArn: !Ref CodePipelineSNSTopic
+              #-   CustomData: !Sub 'A new change set was created for the ${StackPrefix}-ecs-workshop-lz stack. Do you want to implement the changes?'
+              #- RunOrder: '2'
             - Name: ExecuteChangeSet
               ActionTypeId:
                 Category: Deploy
@@ -159,16 +159,16 @@ Resources:
                 TemplateConfiguration: GitArtifact::cf-templates/ecs-cluster/config_params.json
                 TemplatePath: GitArtifact::cf-templates/ecs-cluster/ecs.yml
               RunOrder: '1'
-            - Name: ApproveChangeSetECSCluster
-              ActionTypeId:
-                Category: Approval
-                Owner: AWS
-                Provider: Manual
-                Version: '1'
-              Configuration:
-                NotificationArn: !Ref CodePipelineSNSTopic
-                CustomData: !Sub 'A new change set was created for the ecs-workshop-ecs-cluster stack. Do you want to implement the changes?'
-              RunOrder: '2'
+              #- Name: ApproveChangeSetECSCluster
+              #- ActionTypeId:
+              #-   Category: Approval
+              #-   Owner: AWS
+              #-   Provider: Manual
+              #-   Version: '1'
+              #- Configuration:
+              #-   NotificationArn: !Ref CodePipelineSNSTopic
+              #-   CustomData: !Sub 'A new change set was created for the ecs-workshop-ecs-cluster stack. Do you want to implement the changes?'
+              #- RunOrder: '2'
             - Name: ExecuteChangeSetEcsCluster
               ActionTypeId:
                 Category: Deploy
