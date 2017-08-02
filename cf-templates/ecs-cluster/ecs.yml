@@ -27,8 +27,7 @@ Resources:
           CidrIp: 0.0.0.0/0
           FromPort: 80
       VpcId:
-        Fn::ImportValue:
-          !Sub ${StackPrefix}-VpcId
+        Fn::ImportValue: ecs-workshop-VpcId
       GroupDescription: Service ALB SG
 
   ECSLoadBalancer:
