@@ -37,9 +37,9 @@ Resources:
       Name: !Sub ${StackPrefix}-ecs-workshop-alb
       Subnets:
         - !ImportValue
-            Fn::Sub: "${StackPrefix}-PublicSubnet0ID"
+            ecs-workshop-Public-Subnet-0
         - !ImportValue
-            Fn::Sub: "${StackPrefix}-PublicSubnet1ID"
+            ecs-workshop-Public-Subnet-1
       #Target Groups
       SecurityGroups:
         !Ref serviceALBSG
