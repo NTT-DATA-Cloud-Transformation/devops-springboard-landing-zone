@@ -44,3 +44,9 @@ Resources:
         - !Ref serviceALBSG
       Scheme: internet-facing
 
+Outputs:
+  ECSLoadBalancer:
+    Value: !Ref ECSLoadBalancer
+    Export:
+      Name:
+          !Sub ${StackPrefix}-ECSLoadBalancer
