@@ -34,7 +34,7 @@ Resources:
   ECSLoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
-      Name: 
+      Name: !Sub ${StackPrefix}-ecs-workshop-alb
       Subnets:
         - !ImportValue
             Fn::Sub: "${StackPrefix}-Public-Subnet-0"
