@@ -34,28 +34,14 @@ Resources:
   ECSLoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
-      ConnectionDrainingPolicy:
-        Enabled: true
-        Timeout: 60
+      Name: 
       Subnets:
         - !ImportValue
             Fn::Sub: "${StackPrefix}-Public-Subnet-0"
         - !ImportValue
             Fn::Sub: "${StackPrefix}-Public-Subnet-1"
       #Target Groups
-      Listeners:
-        - InstancePort: 80
-          LoadBalancerPort: 80
-          Protocol: HTTP
-          InstanceProtocol: HTTP
       SecurityGroups:
         !Ref serviceALBSG
-      HealthCheck:
-        HealthyThreshold: 3
-        Interval: 60
-        Target: TCP:80
-        Timeout: 5
-        UnhealthyThreshold: 3
       Scheme: internet-facing
-      CrossZone: True
 
