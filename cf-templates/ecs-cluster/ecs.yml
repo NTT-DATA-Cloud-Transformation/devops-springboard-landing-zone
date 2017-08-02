@@ -42,6 +42,6 @@ Resources:
             ecs-workshop-Public-Subnet-1
       #Target Groups
       SecurityGroups:
-        !Ref serviceALBSG
+        - !Ref serviceALBSG
       Scheme: internet-facing
 
