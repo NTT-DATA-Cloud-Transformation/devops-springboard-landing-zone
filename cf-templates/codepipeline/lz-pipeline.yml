@@ -68,7 +68,7 @@ Resources:
         Location: !Ref TemplatesBucket
         Type: S3
       DisableInboundStageTransitions: []
-      Name: ecs-workshop
+      Name: ecs-workshop-pipeline
       RoleArn: !GetAtt [PipelineRole, Arn]
       Stages:
         - Name: FetchfromGitHub
@@ -76,14 +76,13 @@ Resources:
             - Name: TemplateSource
               ActionTypeId:
                 Category: Source
-                Owner: ThirdParty
-                Provider: GitHub
+                Owner: AWS
+                Provider: S3
                 Version: '1'
               Configuration:
-                Owner: !Ref GitHubRepoOwner
-                Repo: !Ref RepositoryName
-                Branch: !Ref BranchName
-                OAuthToken: !Ref OAuthToken
+                S3Bucket: !Ref TemplatesBucket
+                S3ObjectKey: !Sub ${RepositoryName}/${GitHubRepoOwner}-${RepositoryName}.zip
+                PollForSourceChanges: true
               OutputArtifacts:
                 - Name: S3Artifact
               RunOrder: '1'
@@ -106,16 +105,16 @@ Resources:
                 TemplateConfiguration:  "S3Artifact::cf-templates/landingzone/config_params.json"
                 TemplatePath: "S3Artifact::cf-templates/landingzone/lz.yml"
               RunOrder: '1'
-            - Name: ApproveChangeSet
-              ActionTypeId:
-                Category: Approval
-                Owner: AWS
-                Provider: Manual
-                Version: '1'
-              Configuration:
-                NotificationArn: !Ref CodePipelineSNSTopic
-                CustomData: !Sub 'A new change set was created for the ${StackPrefix}-ecs-workshop-lz stack. Do you want to implement the changes?'
-              RunOrder: '2'
+              #- Name: ApproveChangeSet
+              #- ActionTypeId:
+              #-   Category: Approval
+              #-   Owner: AWS
+              #-   Provider: Manual
+              #-   Version: '1'
+              #- Configuration:
+              #-   NotificationArn: !Ref CodePipelineSNSTopic
+              #-   CustomData: !Sub 'A new change set was created for the ${StackPrefix}-ecs-workshop-lz stack. Do you want to implement the changes?'
+              #- RunOrder: '2'
             - Name: ExecuteChangeSet
               ActionTypeId:
                 Category: Deploy
@@ -148,16 +147,16 @@ Resources:
                 TemplateConfiguration:  "S3Artifact::cf-templates/ecs-cluster/config_params.json"
                 TemplatePath: "S3Artifact::cf-templates/ecs-cluster/ecs.yml"
               RunOrder: '1'
-            - Name: ApproveChangeSetECSCluster
-              ActionTypeId:
-                Category: Approval
-                Owner: AWS
-                Provider: Manual
-                Version: '1'
-              Configuration:
-                NotificationArn: !Ref CodePipelineSNSTopic
-                CustomData: !Sub 'A new change set was created for the ecs-workshop-ecs-cluster stack. Do you want to implement the changes?'
-              RunOrder: '2'
+              #- Name: ApproveChangeSetECSCluster
+              #- ActionTypeId:
+              #-   Category: Approval
+              #-   Owner: AWS
+              #-   Provider: Manual
+              #-   Version: '1'
+              #- Configuration:
+              #-   NotificationArn: !Ref CodePipelineSNSTopic
+              #-   CustomData: !Sub 'A new change set was created for the ecs-workshop-ecs-cluster stack. Do you want to implement the changes?'
+              #- RunOrder: '2'
             - Name: ExecuteChangeSetEcsCluster
               ActionTypeId:
                 Category: Deploy

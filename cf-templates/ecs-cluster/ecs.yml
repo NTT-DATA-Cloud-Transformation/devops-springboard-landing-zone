@@ -49,7 +49,7 @@ Parameters:
     Type: String
     Description: 'Optional : ECS Endpoint for the ECS Agent to connect to'
     Default: ''
-
+    
 Resources:
   EcsSecurityGroup:
     Type: AWS::EC2::SecurityGroup
