@@ -49,7 +49,8 @@ Parameters:
     Type: String
 
 Resources:
-  
+  # S3 Bucket created by git2s3
+  #
   CodePipelineSNSTopic:
     Type: AWS::SNS::Topic
     Properties:
@@ -58,17 +59,19 @@ Resources:
         - Endpoint: !Ref Email
           Protocol: email
 
+
   Pipeline:
     Type: AWS::CodePipeline::Pipeline
     Properties:
       ArtifactStore:
+        #EncryptionKey: !Ref KMSKeyId
         Location: !Ref TemplatesBucket
         Type: S3
       DisableInboundStageTransitions: []
       Name: ecs-workshop-pipeline
       RoleArn: !GetAtt [PipelineRole, Arn]
       Stages:
-        - Name: FetchfromS3
+        - Name: FetchfromGitHub
           Actions:
             - Name: TemplateSource
               ActionTypeId:
@@ -81,23 +84,8 @@ Resources:
                 S3ObjectKey: !Sub ${RepositoryName}/${GitHubRepoOwner}-${RepositoryName}.zip
                 PollForSourceChanges: true
               OutputArtifacts:
-                - Name: GitArtifact
+                - Name: S3Artifact
               RunOrder: '1'
-          #- Name: SyncRepoS3
-          #- Actions:
-          #-   - Name: CodeBuild
-          #-     InputArtifacts:
-          #-       - Name: GitArtifact
-          #-     ActionTypeId:
-          #-       Category: Build
-          #-       Owner: AWS
-          #-       Provider: CodeBuild
-          #-       Version: '1'
-          #-     Configuration:
-          #-       ProjectName: !Sub ${StackPrefix}-ecs-workshop-lz
-          #-     OutputArtifacts:
-          #-       - Name: BuildArtifact
-          #-     RunOrder: '1'    
         - Name: ChangeSetExecution
           Actions:
             - Name: CreateChangeSet
@@ -107,15 +95,15 @@ Resources:
                 Provider: CloudFormation
                 Version: '1'
               InputArtifacts:
-                - Name: GitArtifact
+                - Name: S3Artifact
               Configuration:
                 Capabilities: CAPABILITY_NAMED_IAM
                 ActionMode: CHANGE_SET_REPLACE
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: !Sub ${StackPrefix}-ecs-workshop-lz
                 ChangeSetName: !Ref ChangeSetName
-                TemplateConfiguration: GitArtifact::cf-templates/landingzone/config_params.json
-                TemplatePath: GitArtifact::cf-templates/landingzone/lz.yml
+                TemplateConfiguration:  "S3Artifact::cf-templates/landingzone/config_params.json"
+                TemplatePath: "S3Artifact::cf-templates/landingzone/lz.yml"
               RunOrder: '1'
               #- Name: ApproveChangeSet
               #- ActionTypeId:
@@ -149,15 +137,15 @@ Resources:
                 Provider: CloudFormation
                 Version: '1'
               InputArtifacts:
-                - Name: GitArtifact
+                - Name: S3Artifact
               Configuration:
                 Capabilities: CAPABILITY_NAMED_IAM
                 ActionMode: CHANGE_SET_REPLACE
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: ecs-workshop-ecs-cluster
                 ChangeSetName: !Ref ChangeSetName
-                TemplateConfiguration: GitArtifact::cf-templates/ecs-cluster/config_params.json
-                TemplatePath: GitArtifact::cf-templates/ecs-cluster/ecs.yml
+                TemplateConfiguration:  "S3Artifact::cf-templates/ecs-cluster/config_params.json"
+                TemplatePath: "S3Artifact::cf-templates/ecs-cluster/ecs.yml"
               RunOrder: '1'
               #- Name: ApproveChangeSetECSCluster
               #- ActionTypeId:
@@ -182,40 +170,6 @@ Resources:
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: ecs-workshop-ecs-cluster
               RunOrder: '3'
-  
-  CodeBuildDev:
-    Type: AWS::CodeBuild::Project
-    Properties:
-      Description: !Sub ${StackPrefix}-ecs-workshop-lz-codebuild
-      ServiceRole:
-        Fn::GetAtt:
-        - CodeBuildRole
-        - Arn
-      Tags:
-      - Key: creator
-        Value: codepipeline
-      - Key: purpose
-        Value: !Sub ${StackPrefix}-ecs-workshop-lz
-      Artifacts:
-        Type: CODEPIPELINE
-      TimeoutInMinutes: 60
-      Environment:
-        ComputeType: BUILD_GENERAL1_SMALL
-        Image: aws/codebuild/nodejs:4.3.2
-        Type: LINUX_CONTAINER
-        EnvironmentVariables:
-        - Name: TemplatesBucket
-          Value: !Ref TemplatesBucket
-        - Name: GitHubRepoOwner
-          Value: !Ref GitHubRepoOwner
-        - Name: RepositoryName
-          Value: !Ref RepositoryName
-      Source:
-        Type: CODEPIPELINE
-        BuildSpec:
-          "version: 0.2\n\nphases:\n  build:\n    commands:\n      - echo Build started on `date`\n      - ls\n      - aws s3 sync . s3://${TemplatesBucket}/${RepositoryName}\nartifacts:\n  files:\n    '**/*'\n  base-directory: '.'" 
-      Name: !Sub ${StackPrefix}-ecs-workshop-lz
-
   CFNRole:
     Type: AWS::IAM::Role
     Properties:
@@ -237,23 +191,6 @@ Resources:
                 Effect: Allow
                 Resource: '*'
                 
-  CodeBuildRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-        - Effect: Allow
-          Action: sts:AssumeRole
-          Principal:
-            AWS: "*"
-        - Effect: Allow
-          Action: sts:AssumeRole
-          Principal:
-            AWS: "*"
-      ManagedPolicyArns:
-      - arn:aws:iam::aws:policy/PowerUserAccess
-
   PipelineRole:
     Type: AWS::IAM::Role
     Properties:
