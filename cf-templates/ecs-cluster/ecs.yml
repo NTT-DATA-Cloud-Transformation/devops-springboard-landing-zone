@@ -151,7 +151,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       Name: !Ref TargetGroupName
-      VpcId: !Ref Vpc
+      VpcId: !ImportValue dev-VpcId    
       Port: !Ref ElbPort
       Protocol: HTTP
 
