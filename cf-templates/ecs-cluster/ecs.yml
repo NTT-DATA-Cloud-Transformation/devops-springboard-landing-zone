@@ -7,19 +7,157 @@ Description: 'CloudFormation template for deploying ECS cluster'
 # 3. Launch seed service
 
 Parameters:
-  ClusterName:
+  EcsClusterName:
     Type: String
     Description: The ECS Cluster name
+  EcsInstanceType:
+    Type: String
+    Description: ECS EC2 instance type
+    Default: t2.micro
+    ConstraintDescription: must be a valid EC2 instance type.
+  AsgMaxSize:
+    Type: Number
+    Description: Maximum size and initial Desired Capacity of ECS Auto Scaling Group
+    Default: '1'
+  IamRoleInstanceProfile:
+    Type: String
+    Description: Name or the Amazon Resource Name (ARN) of the instance profile associated
+      with the IAM role for the instance
+  EcsPort:
+    Type: String
+    Description: Optional - Security Group port to open on ECS instances - defaults
+      to port 80
+    Default: '80'
+  ElbPort:
+    Type: String
+    Description: Optional - Security Group port to open on ELB - port 80 will be open
+      by default
+    Default: '80'
+  ElbHealthCheckTarget:
+    Type: String
+    Description: Optional - Health Check Target for ELB - defaults to HTTP:80/
+    Default: HTTP:80/
+  TargetGroupName:
+    Type: String
+    Description: The target group name
+    Default: ECSFirstRunTargetGroup
+  SourceCidr:
+    Type: String
+    Description: Optional - CIDR/IP range for EcsPort and ElbPort - defaults to 0.0.0.0/0
+    Default: 0.0.0.0/0
+  EcsEndpoint:
+    Type: String
+    Description: 'Optional : ECS Endpoint for the ECS Agent to connect to'
+    Default: ''
 
 Resources:
+  EcsSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ECS Allowed Ports
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        - IpProtocol: -1
+          FromPort: !Ref EcsPort
+          ToPort: !Ref EcsPort
+          CidrIp:  !Ref SourceCidr
+        - IpProtocol: -1
+          FromPort: '1'
+          ToPort: '65535'
+          SourceSecurityGroupId: !Ref AlbSecurityGroup
+        - IpProtocol: -1
+          FromPort: !Ref EcsPort
+          ToPort: !Ref EcsPort
+          CidrIp: !Ref SourceCidr
   ECSCluster:
     Type: AWS::ECS::Cluster
     Properties:
-      ClusterName: !Ref ClusterName
+      ClusterName: !Ref EcsClusterName
+
+  ALBSecurityGroup:
+			Type: AWS::EC2::SecurityGroup
+			Properties:
+				SecurityGroupIngress:
+					- ToPort: 80
+						IpProtocol: tcp
+						CidrIp: 0.0.0.0/0
+						FromPort: 80
+				VpcId: !ImportValue ecs-workshop-VpcId
+				GroupDescription: Service ALB SG
+
+  ECSLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub ${StackPrefix}-ecs-workshop-alb
+      Subnets:
+        - !ImportValue
+            ecs-workshop-Public-Subnet-0
+        - !ImportValue
+            ecs-workshop-Public-Subnet-1
+      SecurityGroups:
+        - !Ref ALBSecurityGroup
+      Scheme: internet-facing
+  LoadBalancerListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref EcsLoadBalancer
+      Port: !Ref ElbPort
+      Protocol: HTTP
+      DefaultActions:
+      - Type: forward
+        TargetGroupArn: !Ref DefaultTargetGroup
+
+  EcsInstanceLc:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      ImageId:
+        Ref: EcsAmiId
+      InstanceType:
+        Ref: EcsInstanceType
+      AssociatePublicIpAddress: true
+      IamInstanceProfile:
+        Ref: IamRoleInstanceProfile
+      KeyName:
+        Fn::If:
+        - CreateEC2LCWithKeyPair
+        - Ref: KeyName
+        - Ref: AWS::NoValue
+      SecurityGroups:
+      - Ref: EcsSecurityGroup
+      UserData:
+        Fn::If:
+        - SetEndpointToECSAgent
+        - Fn::Base64:
+            Fn::Join:
+            - ''
+            - - "#!/bin/bash\n"
+              - echo ECS_CLUSTER=
+              - Ref: EcsClusterName
+              - " >> /etc/ecs/ecs.config"
+              - |2-
+
+                echo ECS_BACKEND_HOST=
+              - Ref: EcsEndpoint
+              - " >> /etc/ecs/ecs.config"
+        - Fn::Base64:
+            Fn::Join:
+            - ''
+            - - "#!/bin/bash\n"
+              - echo ECS_CLUSTER=
+              - Ref: EcsClusterName
+              - " >> /etc/ecs/ecs.config"
+  DefaultTargetGroup:
+    Condition: CreateELB
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Ref TargetGroupName
+      VpcId: !Ref Vpc
+      Port: !Ref ElbPort
+      Protocol: HTTP
 
 Outputs:
   ECSCluster:
     Value: !Ref ECSCluster
   Export:
     Name:
-      !Ref ClusterName
+      !Ref EcsClusterName
