@@ -88,7 +88,7 @@ Resources:
   ECSLoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
-      Name: !Sub ${StackPrefix}-ecs-workshop-alb
+      Name: ecs-workshop-alb
       Subnets:
         - !ImportValue
             ecs-workshop-Public-Subnet-0
