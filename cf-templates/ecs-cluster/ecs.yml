@@ -100,7 +100,7 @@ Resources:
   LoadBalancerListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
-      LoadBalancerArn: !GetAtt EcsLoadBalancer.Arn
+      LoadBalancerArn: !Ref ECSLoadBalancer
       Port: !Ref ElbPort
       Protocol: HTTP
       DefaultActions:
