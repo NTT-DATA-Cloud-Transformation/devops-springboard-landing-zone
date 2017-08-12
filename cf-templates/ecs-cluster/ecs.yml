@@ -147,7 +147,6 @@ Resources:
               - Ref: EcsClusterName
               - " >> /etc/ecs/ecs.config"
   DefaultTargetGroup:
-    Condition: CreateELB
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       Name: !Ref TargetGroupName
