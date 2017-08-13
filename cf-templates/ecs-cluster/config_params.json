@@ -3,7 +3,7 @@
     "EcsClusterName": "ecs-workshop-cluster",
     "EcsInstanceType": "t2.micro",
     "AsgMaxSize": "1",
-    "IamRoleInstanceProfile": "ecsInstanceProfile",
+    "IamRoleInstanceProfile": "ecsInstanceRole",
     "EcsPort": "80",
     "ElbPort": "80",
     "ElbHealthCheckTarget": "HTTP:80/",
