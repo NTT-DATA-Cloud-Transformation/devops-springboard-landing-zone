@@ -10,6 +10,14 @@ Parameters:
   EcsClusterName:
     Type: String
     Description: The ECS Cluster name
+  EcsAmiId:
+    Type: String
+    Description: ECS AMI Id
+  KeyName:
+    Type: String
+    Description: Optional - Name of an existing EC2 KeyPair to enable SSH access to
+      the ECS instances
+    Default: ''
   EcsInstanceType:
     Type: String
     Description: ECS EC2 instance type
@@ -50,6 +58,13 @@ Parameters:
     Description: 'Optional : ECS Endpoint for the ECS Agent to connect to'
     Default: ''
     
+Conditions:
+  CreateEC2LCWithKeyPair:
+    Fn::Not:
+    - Fn::Equals:
+      - Ref: KeyName
+      - ''
+        
 Resources:
   EcsSecurityGroup:
     Type: AWS::EC2::SecurityGroup
