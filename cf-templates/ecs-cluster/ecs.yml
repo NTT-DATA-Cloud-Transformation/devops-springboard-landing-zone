@@ -141,20 +141,6 @@ Resources:
       SecurityGroups:
       - Ref: EcsSecurityGroup
       UserData:
-        Fn::If:
-        - SetEndpointToECSAgent
-        - Fn::Base64:
-            Fn::Join:
-            - ''
-            - - "#!/bin/bash\n"
-              - echo ECS_CLUSTER=
-              - Ref: EcsClusterName
-              - " >> /etc/ecs/ecs.config"
-              - |2-
-
-                echo ECS_BACKEND_HOST=
-              - Ref: EcsEndpoint
-              - " >> /etc/ecs/ecs.config"
         - Fn::Base64:
             Fn::Join:
             - ''
