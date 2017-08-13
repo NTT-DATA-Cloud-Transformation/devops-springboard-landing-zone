@@ -3,5 +3,6 @@ version: 0.2
 phases:
   build:
     commands: 
-      - ls > ls-out.txt
-      - aws s3 sync . s3://${TemplatesBucket}/ecs-workshop
+      - curl -LOk https://github.com/${GitHubRepoOwner/${RepositoryName}/archive/${BranchName}.zip
+      - unzip ${BranchName}
+      - aws s3 sync ${RepositoryName}-${BranchName} s3://${TemplatesBucket}/ecs-workshop

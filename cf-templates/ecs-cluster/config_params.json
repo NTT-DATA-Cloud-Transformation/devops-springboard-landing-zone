@@ -1,6 +1,15 @@
 {
   "Parameters": {
-    "ClusterName": "ecs-workshop-cluster",
-    "StackPrefix": "dev"
+    "EcsClusterName": "ecs-workshop-cluster",
+    "EcsInstanceType": "t2.micro",
+    "AsgMaxSize": "1",
+    "IamRoleInstanceProfile": "ecsInstanceRole",
+    "EcsPort": "80",
+    "ElbPort": "80",
+    "ElbHealthCheckTarget": "HTTP:80/",
+    "TargetGroupName": "ECSWorkshopTargetGroup",
+    "SourceCidr": "0.0.0.0/0",
+    "EcsEndpoint": "ecs-workshop",
+    "KeyName": "ecs-workshop"
   }
 }
