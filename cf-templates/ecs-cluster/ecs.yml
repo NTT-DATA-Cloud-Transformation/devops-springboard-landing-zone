@@ -13,7 +13,7 @@ Parameters:
   EcsAmiId:
     Type: String
     Description: ECS AMI Id
-    Default: ami-6df1e514    
+    Default: ami-57d9cd2e    
   KeyName:
     Type: String
     Description: Optional - Name of an existing EC2 KeyPair to enable SSH access to
@@ -168,7 +168,7 @@ Resources:
       UserData:
         Fn::Base64:
           !Sub
-            #!/bin/bash
+            k!/bin/bash
             echo ECS_CLUSTER=${EcsClusterName} >> /etc/ecs/ecs.config
             echo ECS_BACKEND_HOST=${EcsEndpoint} >> /etc/ecs/ecs.config
   DefaultTargetGroup:
