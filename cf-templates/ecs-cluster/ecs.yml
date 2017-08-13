@@ -100,6 +100,31 @@ Resources:
           FromPort: 80
       VpcId: !ImportValue ecs-workshop-VpcId
       GroupDescription: Service ALB SG
+  EcsInstanceAsg:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      VPCZoneIdentifier:
+      - Fn::Join:
+        - ","
+        - - !ImportValue
+              ecs-workshop-Public-Subnet-0
+          - !ImportValue
+              ecs-workshop-Public-Subnet-0
+      LaunchConfigurationName:
+        Ref: EcsInstanceLc
+      MinSize: '0'
+      MaxSize:
+        Ref: AsgMaxSize
+      DesiredCapacity:
+        Ref: AsgMaxSize
+      Tags:
+      - Key: Name
+        Value:
+          Fn::Join:
+          - ''
+          - - 'ECS Instance - '
+            - Ref: AWS::StackName
+        PropagateAtLaunch: 'true'
 
   ECSLoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
