@@ -141,13 +141,10 @@ Resources:
       SecurityGroups:
       - Ref: EcsSecurityGroup
       UserData:
-        - Fn::Base64:
-            Fn::Join:
-            - ''
-            - - "#!/bin/bash\n"
-              - echo ECS_CLUSTER=
-              - Ref: EcsClusterName
-              - " >> /etc/ecs/ecs.config"
+        Fn::Base64:
+          !Sub
+            #!/bin/bash
+            echo ECS_CLUSTER=${EcsClusterName} >> /etc/ecs/ecs.config
   DefaultTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
