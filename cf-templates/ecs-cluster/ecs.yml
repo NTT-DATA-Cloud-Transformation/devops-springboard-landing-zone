@@ -173,6 +173,6 @@ Resources:
 Outputs:
   ECSCluster:
     Value: !Ref ECSCluster
-  Export:
-    Name:
-      !Ref EcsClusterName
+    Export:
+      Name:
+        !Ref EcsClusterName
