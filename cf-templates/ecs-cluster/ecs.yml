@@ -71,7 +71,7 @@ Resources:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: ECS Allowed Ports
-      VpcId: !ImportValue ecs-workshop-VpcIdRef
+      VpcId: !ImportValue ecs-workshop-VpcId
       SecurityGroupIngress:
         - IpProtocol: -1
           FromPort: !Ref EcsPort
@@ -152,7 +152,7 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       Name: !Ref TargetGroupName
-      VpcId: !ImportValue dev-VpcId    
+      VpcId: !ImportValue ecs-workshop-VpcId
       Port: !Ref ElbPort
       Protocol: HTTP
 
