@@ -13,6 +13,7 @@ Parameters:
   EcsAmiId:
     Type: String
     Description: ECS AMI Id
+    Default: ami-6df1e514    
   KeyName:
     Type: String
     Description: Optional - Name of an existing EC2 KeyPair to enable SSH access to
