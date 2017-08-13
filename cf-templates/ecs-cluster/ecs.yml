@@ -109,7 +109,7 @@ Resources:
         - - !ImportValue
               ecs-workshop-Public-Subnet-0
           - !ImportValue
-              ecs-workshop-Public-Subnet-0
+              ecs-workshop-Public-Subnet-1
       LaunchConfigurationName:
         Ref: EcsInstanceLc
       MinSize: '0'
