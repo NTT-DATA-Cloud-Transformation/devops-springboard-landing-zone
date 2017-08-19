@@ -183,5 +183,19 @@ Outputs:
   ECSCluster:
     Value: !Ref ECSCluster
     Export:
-      Name:
-        !Ref EcsClusterName
+      Name: ecs-workshop-cluster-name
+  EcsTargetGroup:
+    Value: !Ref DefaultTargetGroup
+    Export:
+      Name: ecs-workshop-default-tg
+  EcsInstanceLc:
+    Value: 
+    Export:
+      Name: ecs-workshop-instance-lc 
+  LoadBalancerListener:
+    Value:  !Ref LoadBalancerListener
+    Export:
+      Name: ecs-workshop-lb-listener
+
+
+
