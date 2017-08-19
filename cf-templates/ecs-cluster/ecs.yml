@@ -189,7 +189,7 @@ Outputs:
     Export:
       Name: ecs-workshop-default-tg
   EcsInstanceLc:
-    Value: 
+    Value: !Ref EcsInstanceLc
     Export:
       Name: ecs-workshop-instance-lc 
   LoadBalancerListener:
