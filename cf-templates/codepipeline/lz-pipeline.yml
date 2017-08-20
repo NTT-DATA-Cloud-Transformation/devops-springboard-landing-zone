@@ -191,7 +191,7 @@ Resources:
                 Capabilities: CAPABILITY_NAMED_IAM
                 ActionMode: CHANGE_SET_REPLACE
                 RoleArn: !GetAtt CFNRole.Arn
-                StackName: ${StackPrefix}-cluster
+                StackName: !Sub ${StackPrefix}-cluster
                 ChangeSetName: !Ref ChangeSetName
                 TemplateConfiguration:  "S3Artifact::cf-templates/ecs-cluster/config_params.json"
                 TemplateConfiguration:  "S3Artifact::cf-templates/ecs-cluster/config_params.json"
@@ -208,7 +208,7 @@ Resources:
                 ActionMode: CHANGE_SET_EXECUTE
                 ChangeSetName: !Ref ChangeSetName
                 RoleArn: !GetAtt CFNRole.Arn
-                StackName: ecs-workshop-ecs-cluster
+                StackName: !Sub ${StackPrefix}-cluster
               RunOrder: '3'
         - Name: CreateServiceChangeSetExecution
           Actions:
