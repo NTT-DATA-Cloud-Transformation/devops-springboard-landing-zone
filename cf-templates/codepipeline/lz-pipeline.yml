@@ -159,6 +159,42 @@ Resources:
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: ecs-workshop-ecs-cluster
               RunOrder: '3'
+        - Name: CreateServiceChangeSetExecution
+          Actions:
+            - Name: ServiceCreateChangeSet
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: '1'
+              InputArtifacts:
+                - Name: S3Artifact
+              Configuration:
+                Capabilities: CAPABILITY_NAMED_IAM
+                ActionMode: CHANGE_SET_REPLACE
+                RoleArn: 
+                  Fn::ImportValue:
+                    !Sub ${StackPrefix}-cfn-role-arn
+                StackName: !Sub ${StackPrefix}-service
+                ChangeSetName: !Sub ${StackPrefix}-service-changeset
+                TemplateConfiguration:  "S3Artifact::cf-templates/service/config_params.json"
+                TemplatePath: "S3Artifact::cf-templates/service/service-manager.yml"
+              RunOrder: '1'
+            - Name: ServiceExecuteChangeSet
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: '1'
+              Configuration:
+                Capabilities: CAPABILITY_NAMED_IAM
+                ActionMode: CHANGE_SET_EXECUTE
+                ChangeSetName: !Sub ${StackPrefix}-service-changeset
+                RoleArn:
+                  Fn::ImportValue:
+                   !Sub ${StackPrefix}-cfn-role-arn 
+                StackName: !Sub ${StackPrefix}-service
+              RunOrder: '3'
   CFNRole:
     Type: AWS::IAM::Role
     Properties:
