@@ -70,7 +70,7 @@ Resources:
         Version: '2012-10-17'
       Path: /
       Policies:
-        - PolicyName: !Sub ${StackPrefix}-lz-CF
+        - PolicyName: !Sub ${StackPrefix}-network-CF
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
@@ -159,7 +159,7 @@ Resources:
                 Capabilities: CAPABILITY_NAMED_IAM
                 ActionMode: CHANGE_SET_REPLACE
                 RoleArn: !GetAtt CFNRole.Arn
-                StackName: !Sub ${StackPrefix}-lz
+                StackName: !Sub ${StackPrefix}-network
                 ChangeSetName: !Ref ChangeSetName
                 TemplateConfiguration:  "S3Artifact::cf-templates/network/config_params.json"
                 TemplatePath: "S3Artifact::cf-templates/network/network.yml"
@@ -175,7 +175,7 @@ Resources:
                 ActionMode: CHANGE_SET_EXECUTE
                 ChangeSetName: !Ref ChangeSetName
                 RoleArn: !GetAtt CFNRole.Arn
-                StackName: !Sub ${StackPrefix}-lz
+                StackName: !Sub ${StackPrefix}-network
               RunOrder: '3'
         - Name: ChangeSetExecutionForECSCluster
           Actions:
