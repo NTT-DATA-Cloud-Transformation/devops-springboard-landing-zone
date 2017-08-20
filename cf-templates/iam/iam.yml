@@ -87,11 +87,23 @@ Outputs:
     Value: !Ref CFNRole
     Export:
       Name: !Sub ${LZPrefix}-CFN-role
+  CFNRoleArn:
+    Value: !GetAtt CFNRole.Arn
+    Export:
+      Name: !Sub ${LZPrefix}-cfn-role-arn
   PipelineRole:
     Value: !Ref PipelineRole
     Export:
       Name: !Sub ${LZPrefix}-pipeline-role
+  PipelineRoleArn:
+    Value: !GetAtt PipelineRole.Arn
+    Export:
+      Name: !Sub ${LZPrefix}-pipeline-role-arn
   ServiceRole:
     Value: !Ref ServiceRole
     Export:
       Name: !Sub ${LZPrefix}-service-role
+  ServiceRoleArn:
+    Value: !GetAtt ServiceRole.Arn 
+    Export:
+      Name: !Sub ${LZPrefix}-service-role-arn
