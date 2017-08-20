@@ -145,9 +145,9 @@ Resources:
               OutputArtifacts:
                 - Name: S3Artifact
               RunOrder: '1'
-        - Name: ChangeSetExecution
+        - Name: IAMCreateChangeSet
           Actions:
-            - Name: CreateChangeSet
+            - Name: IAMCreateChangeSet
               ActionTypeId:
                 Category: Deploy
                 Owner: AWS
@@ -159,10 +159,29 @@ Resources:
                 Capabilities: CAPABILITY_NAMED_IAM
                 ActionMode: CHANGE_SET_REPLACE
                 RoleArn: !GetAtt CFNRole.Arn
-                StackName: !Sub ${StackPrefix}-lz
+                StackName: !Sub ${StackPrefix}-IAM
                 ChangeSetName: !Ref ChangeSetName
-                TemplateConfiguration:  "S3Artifact::cf-templates/network/config_params.json"
-                TemplatePath: "S3Artifact::cf-templates/network/network.yml"
+                TemplateConfiguration:  "S3Artifact::cf-templates/iam/config_params.json"
+                TemplatePath: "S3Artifact::cf-templates/iam/iam.yml"
+              RunOrder: '1'
+        - Name: IAMChangeSetExecution
+          Actions:
+            - Name: IAMCreateChangeSet
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: '1'
+              InputArtifacts:
+                - Name: S3Artifact
+              Configuration:
+                Capabilities: CAPABILITY_NAMED_IAM
+                ActionMode: CHANGE_SET_REPLACE
+                RoleArn: !GetAtt CFNRole.Arn
+                StackName: !Sub ${StackPrefix}-IAM
+                ChangeSetName: !Ref ChangeSetName
+                TemplateConfiguration:  "S3Artifact::cf-templates/iam/config_params.json"
+                TemplatePath: "S3Artifact::cf-templates/iam/network.yml"
               RunOrder: '1'
             - Name: ExecuteChangeSet
               ActionTypeId:
@@ -230,7 +249,7 @@ Resources:
                 ParameterOverrides: !Sub |
                   {
                     "GitHubToken": "${OAuthToken}",
-                    "ArtifactBucketName": "${TemplateBucket}",
+                    "ArtifactBucketName": "${TemplatesBucket}",
                     "PipelineIamRoleArn": "${PipelineRole.Arn}"
                   }
               RunOrder: '1'
