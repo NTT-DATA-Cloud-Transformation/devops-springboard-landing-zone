@@ -242,4 +242,3 @@ Resources:
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: !Sub ${StackPrefix}-service
               RunOrder: '3'
-  Outputs:
