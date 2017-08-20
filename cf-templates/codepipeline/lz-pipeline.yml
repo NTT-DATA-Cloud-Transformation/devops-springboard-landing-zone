@@ -58,7 +58,66 @@ Resources:
       Subscription:
         - Endpoint: !Ref Email
           Protocol: email
+  CFNRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: ['sts:AssumeRole']
+          Effect: Allow
+          Principal:
+            Service: [cloudformation.amazonaws.com]
+        Version: '2012-10-17'
+      Path: /
+      Policies:
+        - PolicyName: !Sub ${StackPrefix}-network-CF
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                  - '*'
+                Effect: Allow
+                Resource: '*'
 
+  PipelineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: ['sts:AssumeRole']
+          Effect: Allow
+          Principal:
+            Service: [codepipeline.amazonaws.com]
+        Version: '2012-10-17'
+      Path: /
+      Policies:
+        - PolicyName: !Sub ${StackPrefix}-Pipeline-Policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                - 's3:*'
+                - 'codebuild:*'
+                - 'cloudformation:CreateStack'
+                - 'cloudformation:DescribeStacks'
+                - 'cloudformation:DeleteStack'
+                - 'cloudformation:UpdateStack'
+                - 'cloudformation:CreateChangeSet'
+                - 'cloudformation:ExecuteChangeSet'
+                - 'cloudformation:DeleteChangeSet'
+                - 'cloudformation:DescribeChangeSet'
+                - 'cloudformation:SetStackPolicy'
+                - 'iam:PassRole'
+                - 'sns:Publish'
+                - 'codecommit:BatchGetRepositories'
+                - 'codecommit:Get*'
+                - 'codecommit:GitPull'
+                - 'codecommit:List*'
+                - 'codecommit:Update*'
+                - 'codecommit:Test*'
+                - 'codecommit:UploadArchive'
+                Effect: Allow
+                Resource: '*'
 
   Pipeline:
     Type: AWS::CodePipeline::Pipeline
@@ -69,7 +128,7 @@ Resources:
         Type: S3
       DisableInboundStageTransitions: []
       Name: ecs-workshop-pipeline
-      RoleArn: !GetAtt [PipelineRole, Arn]
+      RoleArn: !GetAtt PipelineRole.Arn
       Stages:
         - Name: FetchfromGitHub
           Actions:
@@ -100,21 +159,11 @@ Resources:
                 Capabilities: CAPABILITY_NAMED_IAM
                 ActionMode: CHANGE_SET_REPLACE
                 RoleArn: !GetAtt CFNRole.Arn
-                StackName: !Sub ${StackPrefix}-ecs-workshop-lz
+                StackName: !Sub ${StackPrefix}-lz
                 ChangeSetName: !Ref ChangeSetName
-                TemplateConfiguration:  "S3Artifact::cf-templates/landingzone/config_params.json"
-                TemplatePath: "S3Artifact::cf-templates/landingzone/lz.yml"
+                TemplateConfiguration:  "S3Artifact::cf-templates/network/config_params.json"
+                TemplatePath: "S3Artifact::cf-templates/network/network.yml"
               RunOrder: '1'
-              #- Name: ApproveChangeSet
-              #- ActionTypeId:
-              #-   Category: Approval
-              #-   Owner: AWS
-              #-   Provider: Manual
-              #-   Version: '1'
-              #- Configuration:
-              #-   NotificationArn: !Ref CodePipelineSNSTopic
-              #-   CustomData: !Sub 'A new change set was created for the ${StackPrefix}-ecs-workshop-lz stack. Do you want to implement the changes?'
-              #- RunOrder: '2'
             - Name: ExecuteChangeSet
               ActionTypeId:
                 Category: Deploy
@@ -126,7 +175,7 @@ Resources:
                 ActionMode: CHANGE_SET_EXECUTE
                 ChangeSetName: !Ref ChangeSetName
                 RoleArn: !GetAtt CFNRole.Arn
-                StackName: !Sub ${StackPrefix}-ecs-workshop-lz
+                StackName: !Sub ${StackPrefix}-lz
               RunOrder: '3'
         - Name: ChangeSetExecutionForECSCluster
           Actions:
@@ -142,21 +191,11 @@ Resources:
                 Capabilities: CAPABILITY_NAMED_IAM
                 ActionMode: CHANGE_SET_REPLACE
                 RoleArn: !GetAtt CFNRole.Arn
-                StackName: ecs-workshop-ecs-cluster
+                StackName: !Sub ${StackPrefix}-cluster
                 ChangeSetName: !Ref ChangeSetName
                 TemplateConfiguration:  "S3Artifact::cf-templates/ecs-cluster/config_params.json"
                 TemplatePath: "S3Artifact::cf-templates/ecs-cluster/ecs.yml"
               RunOrder: '1'
-              #- Name: ApproveChangeSetECSCluster
-              #- ActionTypeId:
-              #-   Category: Approval
-              #-   Owner: AWS
-              #-   Provider: Manual
-              #-   Version: '1'
-              #- Configuration:
-              #-   NotificationArn: !Ref CodePipelineSNSTopic
-              #-   CustomData: !Sub 'A new change set was created for the ecs-workshop-ecs-cluster stack. Do you want to implement the changes?'
-              #- RunOrder: '2'
             - Name: ExecuteChangeSetEcsCluster
               ActionTypeId:
                 Category: Deploy
@@ -168,82 +207,37 @@ Resources:
                 ActionMode: CHANGE_SET_EXECUTE
                 ChangeSetName: !Ref ChangeSetName
                 RoleArn: !GetAtt CFNRole.Arn
-                StackName: ecs-workshop-ecs-cluster
+                StackName: !Sub ${StackPrefix}-cluster
               RunOrder: '3'
-  CFNRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Statement:
-        - Action: ['sts:AssumeRole']
-          Effect: Allow
-          Principal:
-            Service: [cloudformation.amazonaws.com]
-        Version: '2012-10-17'
-      Path: /
-      Policies:
-        - PolicyName: !Sub ecs-worksho-lz-CF
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Action:
-                  - '*'
-                Effect: Allow
-                Resource: '*'
-
-  ServiceRole:
-    Type: AWS::IAM::Role
-    Properties:
-      Path: /
-      AssumeRolePolicyDocument:
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - ecs.amazonaws.com
-      ManagedPolicyArns:
-        - arn:aws:iam:aws:policy/service-role/AmazonEC2ConatinerServiceRole
-  PipelineRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Statement:
-        - Action: ['sts:AssumeRole']
-          Effect: Allow
-          Principal:
-            Service: [codepipeline.amazonaws.com]
-        Version: '2012-10-17'
-      Path: /
-      Policies:
-        - PolicyName: !Sub ${StackPrefix}-ecs-workshop-lz-Pipeline
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Action:
-                - 's3:*'
-                - 'codebuild:*'
-                - 'cloudformation:CreateStack'
-                - 'cloudformation:DescribeStacks'
-                - 'cloudformation:DeleteStack'
-                - 'cloudformation:UpdateStack'
-                - 'cloudformation:CreateChangeSet'
-                - 'cloudformation:ExecuteChangeSet'
-                - 'cloudformation:DeleteChangeSet'
-                - 'cloudformation:DescribeChangeSet'
-                - 'cloudformation:SetStackPolicy'
-                - 'iam:PassRole'
-                - 'sns:Publish'
-                - 'codecommit:BatchGetRepositories'
-                - 'codecommit:Get*'
-                - 'codecommit:GitPull'
-                - 'codecommit:List*'
-                - 'codecommit:Update*'
-                - 'codecommit:Test*'
-                - 'codecommit:UploadArchive'
-                Effect: Allow
-                Resource: '*'
-  Outputs:
-    ECSCluster:
-      Value: !Ref ServiceRole
-      Export:
-        Name: ecs-workshop-service-role
+        - Name: CreateServiceChangeSetExecution
+          Actions:
+            - Name: ServiceCreateChangeSet
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: '1'
+              InputArtifacts:
+                - Name: S3Artifact
+              Configuration:
+                Capabilities: CAPABILITY_NAMED_IAM
+                ActionMode: CHANGE_SET_REPLACE
+                RoleArn: !GetAtt CFNRole.Arn
+                StackName: !Sub ${StackPrefix}-service
+                ChangeSetName: !Sub ${StackPrefix}-service-changeset
+                TemplateConfiguration:  "S3Artifact::cf-templates/service/config_params.json"
+                TemplatePath: "S3Artifact::cf-templates/service/service-manager.yml"
+              RunOrder: '1'
+            - Name: ServiceExecuteChangeSet
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: '1'
+              Configuration:
+                Capabilities: CAPABILITY_NAMED_IAM
+                ActionMode: CHANGE_SET_EXECUTE
+                ChangeSetName: !Sub ${StackPrefix}-service-changeset
+                RoleArn: !GetAtt CFNRole.Arn
+                StackName: !Sub ${StackPrefix}-service
+              RunOrder: '3'
