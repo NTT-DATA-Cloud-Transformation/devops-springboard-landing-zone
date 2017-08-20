@@ -161,7 +161,7 @@ Resources:
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: !Sub ${StackPrefix}-iam
                 ChangeSetName: !Sub ${ChangeSetName}-iam
-                TemplateConfiguration:  "S3Artifact::cf-templates/iam/config_params.json"
+                # TemplateConfiguration:  "S3Artifact::cf-templates/iam/config_params.json"
                 TemplatePath: "S3Artifact::cf-templates/iam/iam.yml"
               RunOrder: '1'
             - Name: IAMExecuteChangeSet
