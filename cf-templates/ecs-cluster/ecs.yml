@@ -112,10 +112,10 @@ Resources:
       - Fn::Join:
         - ","
         - -
-            Fn::ImportValue
+          Fn::ImportValue:
               !Sub ${StackPrefix}-Public-Subnet-0
           -
-            Fn::ImportValue
+          Fn::ImportValue:
               !Sub ${StackPrefix}-Public-Subnet-1
       LaunchConfigurationName:
         Ref: EcsInstanceLc
@@ -185,7 +185,7 @@ Resources:
     Properties:
       Name: !Ref TargetGroupName
       VpcId:
-        Fn::ImportValue !Sub ${StackPrefix}-VpcId
+        Fn::ImportValue: !Sub ${StackPrefix}-VpcId
       Port: !Ref ElbPort
       Protocol: HTTP
 
