@@ -159,14 +159,31 @@ Resources:
                 Capabilities: CAPABILITY_NAMED_IAM
                 ActionMode: CHANGE_SET_REPLACE
                 RoleArn: !GetAtt CFNRole.Arn
-                StackName: !Sub ${StackPrefix}-IAM
+                StackName: !Sub ${StackPrefix}-iam
                 ChangeSetName: !Ref ChangeSetName
                 TemplateConfiguration:  "S3Artifact::cf-templates/iam/config_params.json"
                 TemplatePath: "S3Artifact::cf-templates/iam/iam.yml"
               RunOrder: '1'
-        - Name: IAMChangeSetExecution
+            - Name: IAMExecuteChangeSet
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: '1'
+              InputArtifacts:
+                - Name: S3Artifact
+              Configuration:
+                Capabilities: CAPABILITY_NAMED_IAM
+                ActionMode: CHANGE_SET_EXECUTE
+                RoleArn: !GetAtt CFNRole.Arn
+                StackName: !Sub ${StackPrefix}-iam
+                ChangeSetName: !Ref ChangeSetName
+                TemplateConfiguration:  "S3Artifact::cf-templates/iam/config_params.json"
+                TemplatePath: "S3Artifact::cf-templates/iam/iam.yml"
+              RunOrder: '3'
+        - Name: ChangeSetExecution
           Actions:
-            - Name: IAMCreateChangeSet
+            - Name: CreateChangeSet
               ActionTypeId:
                 Category: Deploy
                 Owner: AWS
@@ -178,10 +195,10 @@ Resources:
                 Capabilities: CAPABILITY_NAMED_IAM
                 ActionMode: CHANGE_SET_REPLACE
                 RoleArn: !GetAtt CFNRole.Arn
-                StackName: !Sub ${StackPrefix}-IAM
+                StackName: !Sub ${StackPrefix}-lz
                 ChangeSetName: !Ref ChangeSetName
-                TemplateConfiguration:  "S3Artifact::cf-templates/iam/config_params.json"
-                TemplatePath: "S3Artifact::cf-templates/iam/network.yml"
+                TemplateConfiguration:  "S3Artifact::cf-templates/network/config_params.json"
+                TemplatePath: "S3Artifact::cf-templates/network/network.yml"
               RunOrder: '1'
             - Name: ExecuteChangeSet
               ActionTypeId:
@@ -195,7 +212,7 @@ Resources:
                 ChangeSetName: !Ref ChangeSetName
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: !Sub ${StackPrefix}-lz
-              RunOrder: '3'
+              RunOrder: '3' 
         - Name: ChangeSetExecutionForECSCluster
           Actions:
             - Name: CreateChangeSetECSCluster
