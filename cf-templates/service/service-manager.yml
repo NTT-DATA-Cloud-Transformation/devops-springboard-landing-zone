@@ -11,3 +11,11 @@ Parameters:
   ServiceBucketName:
     Type: String
     Description: Name for bucket we will use for our library
+  ArtifactBucketName:
+    Type: String
+    Description: Name for bucket being used to read the artifacts
+Resources:
+  ServicesBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: !Ref ServiceBucketName
