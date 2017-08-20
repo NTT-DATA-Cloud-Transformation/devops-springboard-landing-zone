@@ -230,7 +230,8 @@ Resources:
                 ParameterOverrides: !Sub |
                   {
                     "GitHubToken": "${OAuthToken}",
-                    "ArtifactBucketName": "${ArtifactBucket}"
+                    "ArtifactBucketName": "${ArtifactBucket}",
+                    "PipelineIamRoleArn": "${PipelineRole.Arn}"
                   }
               RunOrder: '1'
             - Name: ServiceExecuteChangeSet
