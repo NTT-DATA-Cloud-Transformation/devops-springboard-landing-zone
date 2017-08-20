@@ -230,7 +230,7 @@ Resources:
                 ParameterOverrides: !Sub |
                   {
                     "GitHubToken": "${OAuthToken}",
-                    "ArtifactBucketName": "${ArtifactBucket}",
+                    "ArtifactBucketName": "${TemplateBucket}",
                     "PipelineIamRoleArn": "${PipelineRole.Arn}"
                   }
               RunOrder: '1'
