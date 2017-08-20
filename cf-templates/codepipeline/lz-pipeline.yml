@@ -69,7 +69,6 @@ Resources:
         Type: S3
       DisableInboundStageTransitions: []
       Name: ecs-workshop-pipeline
-      RoleArn: !GetAtt [PipelineRole, Arn]
       RoleArn:
         Fn::ImportValue:
           !Sub ${StackPrefix}-pipepine-role-arn
@@ -102,11 +101,13 @@ Resources:
               Configuration:
                 Capabilities: CAPABILITY_NAMED_IAM
                 ActionMode: CHANGE_SET_REPLACE
-                RoleArn: !GetAtt CFNRole.Arn
-                StackName: !Sub ${StackPrefix}-ecs-workshop-lz
+                RoleArn: 
+                  Fn::ImportValue:
+                    !Sub ${StackPrefix}-cfn-role-arn
+                StackName: !Sub ${StackPrefix}-lz
                 ChangeSetName: !Ref ChangeSetName
-                TemplateConfiguration:  "S3Artifact::cf-templates/landingzone/config_params.json"
-                TemplatePath: "S3Artifact::cf-templates/landingzone/lz.yml"
+                TemplateConfiguration:  "S3Artifact::cf-templates/network/config_params.json"
+                TemplatePath: "S3Artifact::cf-templates/network/network.yml"
               RunOrder: '1'
             - Name: ExecuteChangeSet
               ActionTypeId:
@@ -118,8 +119,10 @@ Resources:
                 Capabilities: CAPABILITY_NAMED_IAM
                 ActionMode: CHANGE_SET_EXECUTE
                 ChangeSetName: !Ref ChangeSetName
-                RoleArn: !GetAtt CFNRole.Arn
-                StackName: !Sub ${StackPrefix}-ecs-workshop-lz
+                RoleArn:
+                  Fn::ImportValue:
+                   !Sub ${StackPrefix}-cfn-role-arn 
+                StackName: !Sub ${StackPrefix}-lz
               RunOrder: '3'
         - Name: ChangeSetExecutionForECSCluster
           Actions:
@@ -134,9 +137,12 @@ Resources:
               Configuration:
                 Capabilities: CAPABILITY_NAMED_IAM
                 ActionMode: CHANGE_SET_REPLACE
-                RoleArn: !GetAtt CFNRole.Arn
-                StackName: ecs-workshop-ecs-cluster
+                RoleArn:
+                  Fn::ImportValue:
+                    !Sub ${StackPrefix}-cfn-role-arn
+                StackName: ${StackPrefix}-cluster
                 ChangeSetName: !Ref ChangeSetName
+                TemplateConfiguration:  "S3Artifact::cf-templates/ecs-cluster/config_params.json"
                 TemplateConfiguration:  "S3Artifact::cf-templates/ecs-cluster/config_params.json"
                 TemplatePath: "S3Artifact::cf-templates/ecs-cluster/ecs.yml"
               RunOrder: '1'
