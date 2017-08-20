@@ -13,8 +13,6 @@ Parameters:
     Type: String
     AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
     ConstraintDescription: CIDR Block (10.0.0.0/16)
-
-  #TODO Assuming 2 public and 2 private subnets
   PublicSubnetCIDR0:
     Description: PublicSubnet0 CIDR
     Type: String
@@ -33,8 +31,6 @@ Parameters:
     Type: String
     AllowedPattern: '((\d{1,3})\.){3}\d{1,3}/\d{1,2}'
     ConstraintDescription: CIDR Block (10.0.0.0/16)
-
-  #TODO Need SNS Email?
   
 Resources:
   VPC: 

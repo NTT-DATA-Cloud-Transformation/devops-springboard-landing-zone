@@ -1,0 +1,109 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: Template for deploying stack
+Parameters:
+  LZPrefix:
+    Type: String
+    Description: The LZ Prefix
+    Default: ecs-workshop
+
+Resources:
+  CFNRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: ['sts:AssumeRole']
+          Effect: Allow
+          Principal:
+            Service: [cloudformation.amazonaws.com]
+        Version: '2012-10-17'
+      Path: /
+      Policies:
+        - PolicyName: !Sub ${LZPrefix}-lz-CF
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                  - '*'
+                Effect: Allow
+                Resource: '*'
+
+  ServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ecs.amazonaws.com
+      ManagedPolicyArns:
+        - arn:aws:iam:aws:policy/service-role/AmazonEC2ConatinerServiceRole
+
+  PipelineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: ['sts:AssumeRole']
+          Effect: Allow
+          Principal:
+            Service: [codepipeline.amazonaws.com]
+        Version: '2012-10-17'
+      Path: /
+      Policies:
+        - PolicyName: !Sub ${LZPrefix}-Pipeline-Policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                - 's3:*'
+                - 'codebuild:*'
+                - 'cloudformation:CreateStack'
+                - 'cloudformation:DescribeStacks'
+                - 'cloudformation:DeleteStack'
+                - 'cloudformation:UpdateStack'
+                - 'cloudformation:CreateChangeSet'
+                - 'cloudformation:ExecuteChangeSet'
+                - 'cloudformation:DeleteChangeSet'
+                - 'cloudformation:DescribeChangeSet'
+                - 'cloudformation:SetStackPolicy'
+                - 'iam:PassRole'
+                - 'sns:Publish'
+                - 'codecommit:BatchGetRepositories'
+                - 'codecommit:Get*'
+                - 'codecommit:GitPull'
+                - 'codecommit:List*'
+                - 'codecommit:Update*'
+                - 'codecommit:Test*'
+                - 'codecommit:UploadArchive'
+                Effect: Allow
+                Resource: '*'
+
+Outputs:
+  CFNRole:
+    Value: !Ref CFNRole
+    Export:
+      Name: !Sub ${LZPrefix}-CFN-role
+  CFNRoleArn:
+    Value: !GetAtt CFNRole.Arn
+    Export:
+      Name: !Sub ${LZPrefix}-cfn-role-arn
+  PipelineRole:
+    Value: !Ref PipelineRole
+    Export:
+      Name: !Sub ${LZPrefix}-pipeline-role
+  PipelineRoleArn:
+    Value: !GetAtt PipelineRole.Arn
+    Export:
+      Name: !Sub ${LZPrefix}-pipeline-role-arn
+  ServiceRole:
+    Value: !Ref ServiceRole
+    Export:
+      Name: !Sub ${LZPrefix}-service-role
+  ServiceRoleArn:
+    Value: !GetAtt ServiceRole.Arn 
+    Export:
+      Name: !Sub ${LZPrefix}-service-role-arn
