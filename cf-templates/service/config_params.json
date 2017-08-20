@@ -1,0 +1,5 @@
+{
+  "Parameters" : {
+    "StackPrefix": "ecs-workshop"
+  }
+}

@@ -1,0 +1,13 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: AWS ECS Workshop - Network Stack
+Metadata:
+  VersionDate: 2017-07-24
+  # Others
+
+Parameters:
+  StackPrefix:
+    Type: String
+    Description: Prefix used for naming the resources created. ${StackPrefix}-<resource>.
+  ServiceBucketName:
+    Type: String
+    Description: Name for bucket we will use for our library
