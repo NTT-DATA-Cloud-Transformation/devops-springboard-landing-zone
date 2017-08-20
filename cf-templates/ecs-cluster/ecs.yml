@@ -13,7 +13,7 @@ Parameters:
   EcsAmiId:
     Type: String
     Description: ECS AMI Id
-    Default: ami-57d9cd2e    
+    Default: ami-57d9cd2e
   KeyName:
     Type: String
     Description: Optional - Name of an existing EC2 KeyPair to enable SSH access to
@@ -58,20 +58,24 @@ Parameters:
     Type: String
     Description: 'Optional : ECS Endpoint for the ECS Agent to connect to'
     Default: ''
-    
+  StackPrefix:
+    Type: String
+    Description: String to append before exported outputs
+    Default: 'ecs-workshop'
 Conditions:
   CreateEC2LCWithKeyPair:
     Fn::Not:
     - Fn::Equals:
       - Ref: KeyName
       - ''
-        
+
 Resources:
   EcsSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: ECS Allowed Ports
-      VpcId: !ImportValue ecs-workshop-VpcId
+      VpcId:
+        Fn::ImportValue: !Sub ${StackPrefix}-VpcId
       SecurityGroupIngress:
         - IpProtocol: -1
           FromPort: !Ref EcsPort
@@ -98,7 +102,8 @@ Resources:
           IpProtocol: tcp
           CidrIp: 0.0.0.0/0
           FromPort: 80
-      VpcId: !ImportValue ecs-workshop-VpcId
+      VpcId:
+        Fn::ImportValue: !Sub ${StackPrefix}-VpcId
       GroupDescription: Service ALB SG
   EcsInstanceAsg:
     Type: AWS::AutoScaling::AutoScalingGroup
@@ -106,10 +111,12 @@ Resources:
       VPCZoneIdentifier:
       - Fn::Join:
         - ","
-        - - !ImportValue
-              ecs-workshop-Public-Subnet-0
-          - !ImportValue
-              ecs-workshop-Public-Subnet-1
+        - -
+            Fn::ImportValue
+              !Sub ${StackPrefix}-Public-Subnet-0
+          -
+            Fn::ImportValue
+              !Sub ${StackPrefix}-Public-Subnet-1
       LaunchConfigurationName:
         Ref: EcsInstanceLc
       MinSize: '0'
@@ -129,12 +136,14 @@ Resources:
   ECSLoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
-      Name: ecs-workshop-alb
+      Name: !Sub ${StackPrefix}-alb
       Subnets:
-        - !ImportValue
-            ecs-workshop-Public-Subnet-0
-        - !ImportValue
-            ecs-workshop-Public-Subnet-1
+        -
+          Fn::ImportValue:
+            !Sub ${StackPrefix}-Public-Subnet-0
+        -
+          Fn::ImportValue:
+            !Sub ${StackPrefix}-Public-Subnet-1
       SecurityGroups:
         - !Ref ALBSecurityGroup
       Scheme: internet-facing
@@ -175,7 +184,8 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
       Name: !Ref TargetGroupName
-      VpcId: !ImportValue ecs-workshop-VpcId
+      VpcId:
+        Fn::ImportValue !Sub ${StackPrefix}-VpcId
       Port: !Ref ElbPort
       Protocol: HTTP
 
@@ -183,19 +193,16 @@ Outputs:
   ECSCluster:
     Value: !Ref ECSCluster
     Export:
-      Name: ecs-workshop-cluster-name
+      Name: !Sub ${StackPrefix}-cluster-name
   EcsTargetGroup:
     Value: !Ref DefaultTargetGroup
     Export:
-      Name: ecs-workshop-default-tg
+      Name: !Sub ${StackPrefix}-default-tg
   EcsInstanceLc:
     Value: !Ref EcsInstanceLc
     Export:
-      Name: ecs-workshop-instance-lc 
+      Name: !Sub ${StackPrefix}-instance-lc
   LoadBalancerListener:
     Value:  !Ref LoadBalancerListener
     Export:
-      Name: ecs-workshop-lb-listener
-
-
-
+      Name: !Sub ${StackPrefix}-lb-listener
