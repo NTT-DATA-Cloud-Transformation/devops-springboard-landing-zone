@@ -190,7 +190,19 @@ Resources:
                   - '*'
                 Effect: Allow
                 Resource: '*'
-                
+
+  ServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ecs.amazonaws.com
+      ManagedPolicyArns:
+        - arn:aws:iam:aws:policy/service-role/AmazonEC2ConatinerServiceRole
   PipelineRole:
     Type: AWS::IAM::Role
     Properties:
@@ -230,3 +242,8 @@ Resources:
                 - 'codecommit:UploadArchive'
                 Effect: Allow
                 Resource: '*'
+  Outputs:
+    ECSCluster:
+      Value: !Ref ServiceRole
+      Export:
+        Name: ecs-workshop-service-role
