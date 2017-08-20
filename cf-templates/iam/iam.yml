@@ -3,9 +3,9 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: Template for deploying stack
 
 Parameters:
-  LZPrefix:
+  StackPrefix:
     Type: String
-    Description: The LZ Prefix
+    Description: The StackPrefix for all LZ stacks
     Default: ecs-workshop
 
 Resources:
@@ -26,8 +26,8 @@ Outputs:
   ServiceRole:
     Value: !Ref ServiceRole
     Export:
-      Name: !Sub ${LZPrefix}-service-role
+      Name: !Sub ${StackPrefix}-service-role
   ServiceRoleArn:
-    Value: !GetAtt ServiceRole.Arn 
+    Value: !GetAtt ServiceRole.Arn
     Export:
-      Name: !Sub ${LZPrefix}-service-role-arn
+      Name: !Sub ${StackPrefix}-service-role-arn
