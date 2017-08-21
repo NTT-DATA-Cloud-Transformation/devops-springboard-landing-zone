@@ -4,6 +4,7 @@
     "GitRepo":"ecs-workshop-service",
     "GitBranch":"master",
     "ServiceBucketName":"ecs-workshop-services-bucket",
+    "ServiceBucketPath":"admin",
     "ArtifactBucketName":"flux7-ecs-workshop"
   }
 }

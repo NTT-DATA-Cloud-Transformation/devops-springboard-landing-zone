@@ -11,6 +11,9 @@ Parameters:
   ServiceBucketName:
     Type: String
     Description: Name for bucket we will use for our library
+  ServiceBucketPath:
+    Type: String
+    Description: Path along the bucket where we'll put the templates
   ArtifactBucketName:
     Type: String
     Description: Name for bucket being used to read the artifacts
@@ -36,13 +39,43 @@ Resources:
     Type: "AWS::S3::Bucket"
     Properties:
       BucketName: !Ref ServiceBucketName
-
+  BuildIamRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /
+      AssumeRolePolicyDocument:
+        Statement:
+          -
+            Effect: Allow
+            Action: sts:AssumeRole
+            Principal:
+              Service:
+                - ecs.amazonaws.com
+      Policies:
+        -
+          PolicyName: Sync with Service Library Bucket
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              -
+                Effect: Allow
+                Action: s3:ListAllMyBuckets
+                Resource: arn:aws:s3:::*
+              -
+                Effect: Allow
+                Action:
+                  - s3:ListBucket
+                  - s3:PutObject
+                  - s3:PutObjectAcl
+                Resource:
+                  - !Sub arn:aws:s3:::${ServiceBucketName}/${ServiceBucketPath}/${GitRepo}
+                  - !Sub arn:aws:s3:::${ServiceBucketName}/${ServiceBucketPath}/${GitRepo}/**
   BuildProject:
     Type: "AWS::CodeBuild::Project"
     Properties:
       Description: !Sub ${GitRepo} to S3 to make available
       Name: !Sub ${StackPrefix}-upload-service-repo-to-s3
-      ServiceRole: !Ref BuildIamRole
+      ServiceRole: !Sub ${BuildIamRole.Arn}
       Artifacts:
         Type: CODEPIPELINE
       Source:
@@ -55,7 +88,6 @@ Resources:
                 - echo Starting sync process
             build:
               commands:
-                - aws s3 sync . s3://${BUCKET_NAME}/${BUCKET_PATH}/
                 - aws s3 sync --delete . s3://${BUCKET_NAME}/${BUCKET_PATH}/
             post_build:
               commands:
@@ -70,7 +102,7 @@ Resources:
           - Name: BUCKET_NAME
             Value: ${ServicesBucket}
           - Name: BUCKET_PATH
-            Value: admin/${GitRepo}
+            Value: ${ServiceBucketPath}/${GitRepo}
 
   ServiceManagerPipeline:
     Type: AWS::CodePipeline::Pipeline
