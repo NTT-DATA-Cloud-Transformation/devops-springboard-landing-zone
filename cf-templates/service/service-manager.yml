@@ -40,7 +40,7 @@ Resources:
   BuildProject:
     Type: "AWS::CodeBuild::Project"
     Properties:
-      Description: !Join ['-',['build',!Ref ServiceName,'container']]
+      Description: !Sub ${GitRepo} to S3 to make available
       Name: !Sub ${StackPrefix}-upload-service-repo-to-s3
       ServiceRole: !Ref BuildIamRole
       Artifacts:
