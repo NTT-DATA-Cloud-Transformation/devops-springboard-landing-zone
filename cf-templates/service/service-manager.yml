@@ -13,7 +13,7 @@ Parameters:
     Description: Name for bucket we will use for our library
   ServiceArtifactBucketName:
     Type: String
-    Dedscription: Name for bucket services will use for storing artifacts
+    Description: Name for bucket services will use for storing artifacts
   ServiceBucketPath:
     Type: String
     Description: Path along the bucket where we'll put the templates
