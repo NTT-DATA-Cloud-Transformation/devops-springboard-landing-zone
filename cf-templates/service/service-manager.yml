@@ -79,7 +79,7 @@ Resources:
                   - s3:ListBucket
                 Resource:
                   - !Sub arn:aws:s3:::${ServiceBucketName}
-                  - !Sub 'arn:aws:s3:::${ServiceBucketName}/*
+                  - !Sub 'arn:aws:s3:::${ServiceBucketName}/*'
         -
           PolicyName: CodeBuildStandardPolicy
           PolicyDocument:
