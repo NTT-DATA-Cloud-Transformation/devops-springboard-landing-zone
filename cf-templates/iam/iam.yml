@@ -9,7 +9,7 @@ Parameters:
     Default: ecs-workshop
 
 Resources:
-  ServiceRole:
+  EcsServiceRole:
     Type: AWS::IAM::Role
     Properties:
       Path: /
@@ -23,13 +23,41 @@ Resources:
                 - ecs.amazonaws.com
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceRole
+  CloudFormationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action: ['sts:AssumeRole']
+          Effect: Allow
+          Principal:
+            Service: [cloudformation.amazonaws.com]
+        Version: '2012-10-17'
+      Path: /
+      Policies:
+        - PolicyName: !Sub ${StackPrefix}-Admin
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                  - '*'
+                Effect: Allow
+                Resource: '*'
 
 Outputs:
-  ServiceRole:
-    Value: !Ref ServiceRole
+  EcsServiceRole:
+    Value: !Ref EcsServiceRole
     Export:
-      Name: !Sub ${StackPrefix}-service-role
-  ServiceRoleArn:
-    Value: !GetAtt ServiceRole.Arn
+      Name: !Sub ${StackPrefix}-ecs-service-role
+  EcsServiceRoleArn:
+    Value: !GetAtt EcsServiceRole.Arn
     Export:
-      Name: !Sub ${StackPrefix}-service-role-arn
+      Name: !Sub ${StackPrefix}-ecs-service-role-arn
+  CloudFormationRole:
+    Value: !Ref CloudFormationRole
+    Export:
+      Name: !Sub ${StackPrefix}-cloudformation-role
+  CloudFormationRoleArn:
+    Value: !GetAtt CloudFormationRole.Arn
+    Export:
+      Name: !Sub ${StackPrefix}-cloudformation-role-arn
