@@ -85,7 +85,14 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource:
-                  - *
+                  - * # TODO Narrow down to just the correct log group
+              -
+                Sid: AccessArtifactStore
+                Effect: Allow
+                Action:
+                  - s3:GetObject
+                Resource:
+                  - !Sub arn:aws:s3:::${ArtifactBucketName}/* # TODO: narrow down
   BuildProject:
     Type: "AWS::CodeBuild::Project"
     Properties:
