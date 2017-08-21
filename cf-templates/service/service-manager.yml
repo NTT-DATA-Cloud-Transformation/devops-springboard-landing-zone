@@ -71,7 +71,15 @@ Resources:
                   - s3:PutObjectAcl
                 Resource:
                   - !Sub arn:aws:s3:::${ServiceBucketName}/${ServiceBucketPath}/${GitRepo}
-                  - !Sub arn:aws:s3:::${ServiceBucketName}/${ServiceBucketPath}/${GitRepo}/**
+                  - !Sub 'arn:aws:s3:::${ServiceBucketName}/${ServiceBucketPath}/${GitRepo}/*'
+              -
+                Sid: PutInTemplateBucket
+                Effect: Allow
+                Action:
+                  - s3:ListBucket
+                Resource:
+                  - !Sub arn:aws:s3:::${ServiceBucketName}
+                  - !Sub 'arn:aws:s3:::${ServiceBucketName}/*
         -
           PolicyName: CodeBuildStandardPolicy
           PolicyDocument:
