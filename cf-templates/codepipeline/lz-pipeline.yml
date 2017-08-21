@@ -279,5 +279,5 @@ Resources:
                 ActionMode: CHANGE_SET_EXECUTE
                 ChangeSetName: !Sub ${StackPrefix}-service-changeset
                 RoleArn: !GetAtt CFNRole.Arn
-                StackName: !Sub ${StackPrefix}-service
+                StackName: !Sub ${StackPrefix}-service-manager
               RunOrder: '3'
