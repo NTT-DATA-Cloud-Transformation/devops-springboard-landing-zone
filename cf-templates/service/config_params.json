@@ -3,7 +3,7 @@
     "StackPrefix": "ecs-workshop",
     "GitRepo":"ecs-workshop-service",
     "GitBranch":"master",
-    "ServiceTemplateBucketName":"ecs-workshop-services-bucket",
+    "ServiceTemplateBucketName":"ecs-workshop-services-template-bucket",
     "ServiceArtifactBucketName":"ecs-workshop-services-artifact-bucket",
     "ServiceBucketPath":"admin",
     "ArtifactBucketName":"flux7-ecs-workshop"
