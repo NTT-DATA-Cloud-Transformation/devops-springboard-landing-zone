@@ -261,6 +261,7 @@ Resources:
                 TemplatePath: "S3Artifact::cf-templates/service/service-manager.yml"
                 ParameterOverrides: !Sub |
                   {
+                    "GitHubUser": "${GitHubRepoOwner}"
                     "GitHubToken": "${OAuthToken}",
                     "ArtifactBucketName": "${TemplatesBucket}",
                     "PipelineIamRoleArn": "${PipelineRole.Arn}"
