@@ -33,7 +33,7 @@ Parameters:
     Description: 'OAuth Token for repo access'
     Type: 'String'
     Default: ""
-    ParameterProperty: NoEcho
+    NoEcho: true
 
 Resources:
   ServicesBucket:
