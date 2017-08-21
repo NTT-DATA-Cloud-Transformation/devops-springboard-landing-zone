@@ -22,7 +22,7 @@ Resources:
               Service:
                 - ecs.amazonaws.com
       ManagedPolicyArns:
-        - arn:aws:iam:aws:policy/service-role/AmazonEC2ConatinerServiceRole
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceRole
 
 Outputs:
   ServiceRole:
