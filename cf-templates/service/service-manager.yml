@@ -21,7 +21,7 @@ Parameters:
     Description: 'User for GitHub'
     Type: String
   GitRepo:
-    Description: 'URL for Git repo'
+    Description: 'Git repo name'
     Type: 'String'
   GitBranch:
     Description: 'Branch being deployed'
