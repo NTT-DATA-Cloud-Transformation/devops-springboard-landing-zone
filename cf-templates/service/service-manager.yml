@@ -123,9 +123,9 @@ Resources:
           - Name: AWS_DEFAULT_REGION
             Value: !Ref AWS::Region
           - Name: BUCKET_NAME
-            Value: ${ServicesBucket}
+            Value: !Sub ${ServicesBucket}
           - Name: BUCKET_PATH
-            Value: ${ServiceBucketPath}/${GitRepo}
+            Value: !Sub ${ServiceBucketPath}/${GitRepo}
 
   ServiceManagerPipeline:
     Type: AWS::CodePipeline::Pipeline
