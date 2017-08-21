@@ -128,6 +128,7 @@ Resources:
         Location: !Ref TemplatesBucket
         Type: S3
       DisableInboundStageTransitions: []
+      RestartExecutionOnUpdate: true
       Name: ecs-workshop-pipeline
       RoleArn: !GetAtt PipelineRole.Arn
       Stages:
