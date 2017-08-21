@@ -106,7 +106,7 @@ Resources:
   ServiceManagerPipeline:
     Type: AWS::CodePipeline::Pipeline
     Properties:
-      Name: "service-manager-pipeline"
+      Name: !Sub ${StackPrefix}-service-manager-pipeline
       ArtifactStore:
         Location: !Ref ArtifactBucketName
         Type: 'S3'
