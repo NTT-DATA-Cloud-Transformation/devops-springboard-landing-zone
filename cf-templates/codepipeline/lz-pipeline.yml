@@ -41,6 +41,7 @@ Parameters:
   OAuthToken:
     Description: OAuthToken used to authenticate with GitHub
     Type: String
+    ParameterProperty: NoEcho
   Email:
     Description: Email for manual approval of ChangeSet
     Type: String
