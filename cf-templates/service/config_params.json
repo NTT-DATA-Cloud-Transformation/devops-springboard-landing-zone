@@ -1,5 +1,9 @@
 {
   "Parameters" : {
-    "StackPrefix": "ecs-workshop"
+    "StackPrefix": "ecs-workshop",
+    "GitRepo":"ecs-workshop-service",
+    "GitBranch":"master",
+    "ServiceBucketName":"ecs-workshop-services-bucket",
+    "ArtifactBucketName":"flux7-ecs-workshop"
   }
 }
