@@ -259,13 +259,14 @@ Resources:
                 ChangeSetName: !Sub ${StackPrefix}-service-changeset
                 TemplateConfiguration:  "S3Artifact::cf-templates/service/config_params.json"
                 TemplatePath: "S3Artifact::cf-templates/service/service-manager.yml"
-                ParameterOverrides: !Sub |
-                  {
-                    "GitHubUser": "${GitHubRepoOwner}"
-                    "GitHubToken": "${OAuthToken}",
-                    "ArtifactBucketName": "${TemplatesBucket}",
-                    "PipelineIamRoleArn": "${PipelineRole.Arn}"
-                  }
+                ParameterOverrides:
+                  !Sub |
+                    {
+                      "GitHubUser": "${GitHubRepoOwner}"
+                      "GitHubToken": "${OAuthToken}",
+                      "ArtifactBucketName": "${TemplatesBucket}",
+                      "PipelineIamRoleArn": "${PipelineRole.Arn}"
+                    }
               RunOrder: '1'
             - Name: ServiceExecuteChangeSet
               ActionTypeId:
