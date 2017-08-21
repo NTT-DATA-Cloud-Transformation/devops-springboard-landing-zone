@@ -73,7 +73,7 @@ Resources:
                   - !Sub arn:aws:s3:::${ServiceBucketName}/${ServiceBucketPath}/${GitRepo}
                   - !Sub 'arn:aws:s3:::${ServiceBucketName}/${ServiceBucketPath}/${GitRepo}/*'
               -
-                Sid: PutInTemplateBucket
+                Sid: ListBucket
                 Effect: Allow
                 Action:
                   - s3:ListBucket
