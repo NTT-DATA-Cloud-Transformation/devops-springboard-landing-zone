@@ -255,7 +255,7 @@ Resources:
                 Capabilities: CAPABILITY_NAMED_IAM
                 ActionMode: CHANGE_SET_REPLACE
                 RoleArn: !GetAtt CFNRole.Arn
-                StackName: !Sub ${StackPrefix}-service
+                StackName: !Sub ${StackPrefix}-service-manager
                 ChangeSetName: !Sub ${StackPrefix}-service-changeset
                 TemplateConfiguration:  "S3Artifact::cf-templates/service/config_params.json"
                 TemplatePath: "S3Artifact::cf-templates/service/service-manager.yml"
