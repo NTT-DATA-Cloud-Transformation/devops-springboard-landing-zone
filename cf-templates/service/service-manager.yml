@@ -53,7 +53,7 @@ Resources:
                 - ecs.amazonaws.com
       Policies:
         -
-          PolicyName: Sync with Service Library Bucket
+          PolicyName: SyncToTemplatesBucket
           PolicyDocument:
             Version: 2012-10-17
             Statement:
