@@ -15,7 +15,9 @@ Resources:
       Path: /
       AssumeRolePolicyDocument:
         Statement:
-          - Effect: Allow
+          -
+            Effect: Allow
+            Action: sts:AssumeRole
             Principal:
               Service:
                 - ecs.amazonaws.com
