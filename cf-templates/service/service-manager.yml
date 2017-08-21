@@ -8,9 +8,12 @@ Parameters:
   StackPrefix:
     Type: String
     Description: Prefix used for naming the resources created. ${StackPrefix}-<resource>.
-  ServiceBucketName:
+  ServiceTemplateBucketName:
     Type: String
     Description: Name for bucket we will use for our library
+  ServiceArtifactBucketName:
+    Type: String
+    Dedscription: Name for bucket services will use for storing artifacts
   ServiceBucketPath:
     Type: String
     Description: Path along the bucket where we'll put the templates
@@ -36,10 +39,14 @@ Parameters:
     NoEcho: true
 
 Resources:
-  ServicesBucket:
+  ServiceTemplateBucket:
     Type: "AWS::S3::Bucket"
     Properties:
-      BucketName: !Ref ServiceBucketName
+      BucketName: !Ref ServiceTemplateBucketName
+  ServiceArtifactBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: !Ref ServiceArtifactBucketName
   BuildIamRole:
     Type: AWS::IAM::Role
     Properties:
@@ -70,16 +77,16 @@ Resources:
                   - s3:PutObject
                   - s3:PutObjectAcl
                 Resource:
-                  - !Sub arn:aws:s3:::${ServiceBucketName}/${ServiceBucketPath}/${GitRepo}
-                  - !Sub 'arn:aws:s3:::${ServiceBucketName}/${ServiceBucketPath}/${GitRepo}/*'
+                  - !Sub arn:aws:s3:::${ServiceTemplateBucketName}/${ServiceBucketPath}/${GitRepo}
+                  - !Sub 'arn:aws:s3:::${ServiceTemplateBucketName}/${ServiceBucketPath}/${GitRepo}/*'
               -
                 Sid: ListBucket
                 Effect: Allow
                 Action:
                   - s3:ListBucket
                 Resource:
-                  - !Sub arn:aws:s3:::${ServiceBucketName}
-                  - !Sub 'arn:aws:s3:::${ServiceBucketName}/*'
+                  - !Sub arn:aws:s3:::${ServiceTemplateBucketName}
+                  - !Sub 'arn:aws:s3:::${ServiceTemplateBucketName}/*'
         -
           PolicyName: CodeBuildStandardPolicy
           PolicyDocument:
@@ -131,7 +138,7 @@ Resources:
           - Name: AWS_DEFAULT_REGION
             Value: !Ref AWS::Region
           - Name: BUCKET_NAME
-            Value: !Sub ${ServicesBucket}
+            Value: !Sub ${ServiceTemplateBucket}
           - Name: BUCKET_PATH
             Value: !Sub ${ServiceBucketPath}/${GitRepo}
 
@@ -176,3 +183,12 @@ Resources:
               InputArtifacts: [Name: 'GitHubArtifact']
               OutputArtifacts: [Name: 'BuildOutput']
               RunOrder: 20
+Outputs:
+  ServiceTemplateBucket:
+    Value: !Ref ServiceTemplateBucket
+    Export:
+      Name: !Sub ${StackPrefix}-service-template-bucket
+  ServiceArtifactBucket:
+    Value: !Ref ServiceArtifactBucket
+    Export:
+      Name: !Sub ${StackPrefix}-service-artifact-bucket
