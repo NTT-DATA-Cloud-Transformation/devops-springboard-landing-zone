@@ -41,7 +41,7 @@ Resources:
     Type: "AWS::CodeBuild::Project"
     Properties:
       Description: !Join ['-',['build',!Ref ServiceName,'container']]
-      Name: !Sub build-${ServiceName}-container
+      Name: !Sub ${StackPrefix}-upload-service-repo-to-s3
       ServiceRole: !Ref BuildIamRole
       Artifacts:
         Type: CODEPIPELINE
@@ -98,3 +98,17 @@ Resources:
               OutputArtifacts:
                 - Name: GitHubArtifact
               RunOrder: '1'
+        - Name: Deploy2S3
+        # Use CodeBuild to deploy the templates to S3
+          Actions:
+            - Name: CodeBuild
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              Configuration:
+                ProjectName: !Sub ${StackPrefix}-upload-service-repo-to-s3
+              InputArtifacts: [Name: 'GitHubArtifact']
+              OutputArtifacts: [Name: 'BuildOutput']
+              RunOrder: 20
