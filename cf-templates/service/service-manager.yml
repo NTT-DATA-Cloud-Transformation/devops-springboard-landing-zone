@@ -17,6 +17,9 @@ Parameters:
   PipelineIamRoleArn:
     Type: String
     Description: Arn of role to use for managing this pipeline
+  GitHubUser:
+    Description: 'User for GitHub'
+    Type: String
   GitRepo:
     Description: 'URL for Git repo'
     Type: 'String'
@@ -38,7 +41,7 @@ Resources:
     Properties:
       Name: "service-manager-pipeline"
       ArtifactStore:
-        Location: !Ref ArtifactBucket
+        Location: !Ref ArtifactBucketName
         Type: 'S3'
       RoleArn: !Ref PipelineIamRoleArn
       Stages:
