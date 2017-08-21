@@ -85,10 +85,7 @@ Resources:
                   - logs:CreateLogStream
                   - logs:PutLogEvents
                 Resource:
-                  - !Sub arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:build/${StackPrefix}-upload-service-repo-to-s3:*
-
-
-
+                  - *
   BuildProject:
     Type: "AWS::CodeBuild::Project"
     Properties:
