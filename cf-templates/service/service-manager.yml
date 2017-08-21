@@ -49,8 +49,7 @@ Resources:
             Effect: Allow
             Action: sts:AssumeRole
             Principal:
-              Service:
-                - ecs.amazonaws.com
+              Service: 'codebuild.amazonaws.com'
       Policies:
         -
           PolicyName: SyncToTemplatesBucket
