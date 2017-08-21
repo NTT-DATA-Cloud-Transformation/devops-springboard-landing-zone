@@ -58,10 +58,12 @@ Resources:
             Version: 2012-10-17
             Statement:
               -
+                Sid: ViewAllS3Buckets
                 Effect: Allow
                 Action: s3:ListAllMyBuckets
                 Resource: arn:aws:s3:::*
               -
+                Sid: PutInTemplateBucket
                 Effect: Allow
                 Action:
                   - s3:ListBucket
@@ -70,6 +72,23 @@ Resources:
                 Resource:
                   - !Sub arn:aws:s3:::${ServiceBucketName}/${ServiceBucketPath}/${GitRepo}
                   - !Sub arn:aws:s3:::${ServiceBucketName}/${ServiceBucketPath}/${GitRepo}/**
+        -
+          PolicyName: CodeBuildStandardPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              -
+                Sid: AccessToCloudWatchLogs
+                Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource:
+                  - !Sub arn:aws:codebuild:${AWS::Region}:${AWS::AccountId}:build/${StackPrefix}-upload-service-repo-to-s3
+
+
+
   BuildProject:
     Type: "AWS::CodeBuild::Project"
     Properties:
