@@ -11,3 +11,52 @@ Parameters:
   ServiceBucketName:
     Type: String
     Description: Name for bucket we will use for our library
+  ArtifactBucketName:
+    Type: String
+    Description: Name for bucket being used to read the artifacts
+  PipelineIamRoleArn:
+    Type: String
+    Description: Arn of role to use for managing this pipeline
+  GitRepo:
+    Description: 'URL for Git repo'
+    Type: 'String'
+  GitBranch:
+    Description: 'Branch being deployed'
+    Type: 'String'
+  GitHubToken:
+    Description: 'OAuth Token for repo access'
+    Type: 'String'
+    Default: ""
+
+Resources:
+  ServicesBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: !Ref ServiceBucketName
+  ServiceManagerPipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      Name: "service-manager-pipeline"
+      ArtifactStore:
+        Location: !Ref ArtifactBucket
+        Type: 'S3'
+      RoleArn: !Ref PipelineIamRoleArn
+      Stages:
+        -
+          Name: Source
+          Actions:
+            -
+              Name: AppRepoSource
+              ActionTypeId:
+                Category: Source
+                Owner: ThirdParty
+                Provider: GitHub
+                Version: 1
+              Configuration:
+                Owner: !Ref GitHubUser
+                Repo: !Ref GitRepo
+                Branch: !Ref GitBranch
+                OAuthToken: !Ref GitHubToken
+              OutputArtifacts:
+                - Name: GitHubArtifact
+              RunOrder: '1'
