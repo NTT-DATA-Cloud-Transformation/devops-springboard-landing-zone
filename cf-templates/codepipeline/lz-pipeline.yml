@@ -262,7 +262,7 @@ Resources:
                 ParameterOverrides:
                   !Sub |
                     {
-                      "GitHubUser": "${GitHubRepoOwner}"
+                      "GitHubUser": "${GitHubRepoOwner}",
                       "GitHubToken": "${OAuthToken}",
                       "ArtifactBucketName": "${TemplatesBucket}",
                       "PipelineIamRoleArn": "${PipelineRole.Arn}"
