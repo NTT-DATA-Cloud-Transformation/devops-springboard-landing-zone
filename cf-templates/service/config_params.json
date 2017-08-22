@@ -5,6 +5,7 @@
     "GitBranch":"master",
     "ServiceTemplateBucketName":"ecs-workshop-services-template-bucket",
     "ServiceArtifactBucketName":"ecs-workshop-services-artifact-bucket",
+    "ServiceResourceBucketName":"ecs-workshop-services-resource-bucket",
     "ServiceBucketPath":"admin",
     "ArtifactBucketName":"flux7-ecs-workshop"
   }

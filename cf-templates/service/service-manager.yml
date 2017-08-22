@@ -14,6 +14,9 @@ Parameters:
   ServiceArtifactBucketName:
     Type: String
     Description: Name for bucket services will use for storing artifacts
+  ServiceResourceBucketName:
+    Type: String
+    Description: Name for bucket services will use for reading and writing
   ServiceBucketPath:
     Type: String
     Description: Path along the bucket where we'll put the templates
@@ -47,6 +50,10 @@ Resources:
     Type: "AWS::S3::Bucket"
     Properties:
       BucketName: !Ref ServiceArtifactBucketName
+  ServiceResourceBucket:
+    Type: "AWS::S3::Bucket"
+    Properties:
+      BucketName: !Ref ServiceResourceBucketName
   BuildIamRole:
     Type: AWS::IAM::Role
     Properties:
@@ -192,3 +199,7 @@ Outputs:
     Value: !Ref ServiceArtifactBucket
     Export:
       Name: !Sub ${StackPrefix}-service-artifact-bucket
+  ServiceResourceBucket:
+    Value: !Ref ServiceResourceBucket
+    Export:
+      Name: !Sub ${StackPrefix}-service-resource-bucket
