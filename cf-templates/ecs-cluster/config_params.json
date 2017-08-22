@@ -2,7 +2,8 @@
   "Parameters": {
     "EcsClusterName": "ecs-workshop-cluster",
     "EcsInstanceType": "t2.micro",
-    "AsgMaxSize": "1",
+    "AsgMaxSize": "2",
+    "AsgMinSize": "2",    
     "IamRoleInstanceProfile": "ecsInstanceRole",
     "EcsPort": "80",
     "ElbPort": "80",
