@@ -210,6 +210,6 @@ Outputs:
     Export:
       Name: !Sub ${StackPrefix}-lb-listener
   LoadBalancerDNS:
-    Value:  !Sub ${LoadBalancer.DNSName}
+    Value:  !Sub ${ECSLoadBalancer.DNSName}
     Export:
       Name: !Sub ${StackPrefix}-lb-dns
