@@ -209,3 +209,7 @@ Outputs:
     Value:  !Ref LoadBalancerListener
     Export:
       Name: !Sub ${StackPrefix}-lb-listener
+  LoadBalancerDNS:
+    Value:  !Sub ${LoadBalancer.DNSName}
+    Export:
+      Name: !Sub ${StackPrefix}-lb-dns
