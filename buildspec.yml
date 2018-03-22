@@ -5,4 +5,7 @@ phases:
     commands: 
       - curl -LOk https://github.com/${GitHubRepoOwner/${RepositoryName}/archive/${BranchName}.zip
       - unzip ${BranchName}
+      - ls
+      - pwd
       - aws s3 sync ${RepositoryName}-${BranchName} s3://${TemplatesBucket}/ecs-workshop
+
