@@ -1,5 +1,7 @@
 # ecs-workshop-lz  
 
+This repository contains the templates to create landing-zone resources like VPC, IAM Roles, Application loadbalancer etc
+
 
 
 
