@@ -133,6 +133,7 @@ Resources:
                 - echo Starting sync process
             build:
               commands:
+                - ls
                 - aws s3 sync --delete . s3://${BUCKET_NAME}/${BUCKET_PATH}/
             post_build:
               commands:
