@@ -8,7 +8,7 @@
     "EcsPort": "80",
     "ElbPort": "80",
     "ElbHealthCheckTarget": "HTTP:80/",
-    "TargetGroupName": "PlatformTestECSWorkshopTargetGroup",
+    "TargetGroupName": "PTECSWorkshopTargetGroup",
     "SourceCidr": "0.0.0.0/0",
     "EcsEndpoint": "platform-test-ecs-workshop",
     "KeyName": "platform-test-ecs-workshop",
