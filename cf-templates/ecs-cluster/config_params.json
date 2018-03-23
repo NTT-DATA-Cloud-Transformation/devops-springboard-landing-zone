@@ -1,6 +1,6 @@
 {
   "Parameters": {
-    "EcsClusterName": "ecs-workshop-cluster",
+    "EcsClusterName": "platform-test-ecs-workshop-cluster",
     "EcsInstanceType": "t2.micro",
     "AsgMaxSize": "2",
     "AsgMinSize": "2",    
@@ -8,10 +8,11 @@
     "EcsPort": "80",
     "ElbPort": "80",
     "ElbHealthCheckTarget": "HTTP:80/",
-    "TargetGroupName": "ECSWorkshopTargetGroup",
+    "TargetGroupName": "PlatformTestECSWorkshopTargetGroup",
     "SourceCidr": "0.0.0.0/0",
-    "EcsEndpoint": "ecs-workshop",
-    "KeyName": "ecs-workshop",
-    "StackPrefix": "ecs-workshop"
+    "EcsEndpoint": "platform-test-ecs-workshop",
+    "KeyName": "platform-test-ecs-workshop",
+    "StackPrefix": "platform-test-ecs-workshop",
+    "EcsAmiId" : "ami-04351e12"
   }
 }
