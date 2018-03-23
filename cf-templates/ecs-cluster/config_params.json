@@ -12,7 +12,7 @@
     "SourceCidr": "0.0.0.0/0",
     "EcsEndpoint": "platform-test-ecs-workshop",
     "KeyName": "platform-test-ecs-workshop",
-    "StackPrefix": "pt-ecs-workshop",
+    "StackPrefix": "pt-ecs-ws",
     "EcsAmiId" : "ami-04351e12"
   }
 }

@@ -1,6 +1,6 @@
 {
   "Parameters" : {
-    "StackPrefix": "pt-ecs-workshop",
+    "StackPrefix": "pt-ecs-ws",
     "GitRepo":"ecs-workshop-service",
     "GitBranch":"feat-launch-type",
     "GitHubUser":"mohitkumarsharmaflux7",
