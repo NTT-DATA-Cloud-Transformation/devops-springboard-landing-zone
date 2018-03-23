@@ -1,6 +1,6 @@
 {
   "Parameters" : {
-    "StackPrefix": "platform-test-ecs-workshop",
+    "StackPrefix": "pt-ecs-workshop",
     "CIDR": "10.0.0.0/16",
     "PrivateSubnetCIDR0": "10.0.0.0/24",
     "PrivateSubnetCIDR1": "10.0.1.0/24",

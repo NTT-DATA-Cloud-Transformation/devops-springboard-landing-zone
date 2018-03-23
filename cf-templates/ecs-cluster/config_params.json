@@ -1,6 +1,6 @@
 {
   "Parameters": {
-    "EcsClusterName": "platform-test-ecs-workshop-cluster",
+    "EcsClusterName": "pt-ecs-workshop-cluster",
     "EcsInstanceType": "t2.micro",
     "AsgMaxSize": "2",
     "AsgMinSize": "2",    
@@ -12,7 +12,7 @@
     "SourceCidr": "0.0.0.0/0",
     "EcsEndpoint": "platform-test-ecs-workshop",
     "KeyName": "platform-test-ecs-workshop",
-    "StackPrefix": "platform-test-ecs-workshop",
+    "StackPrefix": "pt-ecs-workshop",
     "EcsAmiId" : "ami-04351e12"
   }
 }

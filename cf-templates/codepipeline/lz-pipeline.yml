@@ -132,25 +132,21 @@ Resources:
       Name: ecs-workshop-pipeline
       RoleArn: !GetAtt PipelineRole.Arn
       Stages:
-        - Name: FetchFromGitHub
+        - Name: FetchfromGitHub
           Actions:
-          - InputArtifacts: []
-            Name: TemplateSource
-            ActionTypeId:
-              Category: Source
-              Owner: ThirdParty
-              Version: '1'
-              Provider: GitHub
-            OutputArtifacts:
-            - Name: SourceArtifact
-            Configuration:
-              Owner: flux7labs
-                Ref: GitHubUser
-              Branch:
-                Ref: "feat-launch-type"
-              Repo:
-                Ref: "ecs-workshop-lz"
-            RunOrder: 1
+            - Name: TemplateSource
+              ActionTypeId:
+                Category: Source
+                Owner: AWS
+                Provider: S3
+                Version: '1'
+              Configuration:
+                S3Bucket: !Ref TemplatesBucket
+                S3ObjectKey: !Sub ${RepositoryName}/${GitHubRepoOwner}-${RepositoryName}.zip
+                PollForSourceChanges: true
+              OutputArtifacts:
+                - Name: S3Artifact
+              RunOrder: '1'
 
         - Name: IAMStackDeploy
           Actions:

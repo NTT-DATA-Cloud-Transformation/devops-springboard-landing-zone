@@ -1,5 +1,5 @@
 {
   "Parameters" : {
-    "StackPrefix": "platform-test-ecs-workshop"
+    "StackPrefix": "pt-ecs-workshop"
   }
 }

@@ -1,6 +1,6 @@
 {
   "Parameters" : {
-    "StackPrefix": "platform-test-ecs-workshop",
+    "StackPrefix": "pt-ecs-workshop",
     "GitRepo":"ecs-workshop-service",
     "GitBranch":"feat-launch-type",
     "GitHubUser":"mohitkumarsharmaflux7",
