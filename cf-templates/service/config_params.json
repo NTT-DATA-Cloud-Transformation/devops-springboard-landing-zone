@@ -4,10 +4,10 @@
     "GitRepo":"ecs-workshop-service",
     "GitBranch":"feat-launch-type",
     "GitHubUser":"mohitkumarsharmaflux7",
-    "ServiceTemplateBucketName":"platform-test-ecs-workshop-services-template-bucket",
-    "ServiceArtifactBucketName":"platform-test-ecs-workshop-services-artifact-bucket",
-    "ServiceResourceBucketName":"platform-test-ecs-workshop-services-resource-bucket",
+    "ServiceTemplateBucketName":"pt-ecs-workshop-services-template-bucket",
+    "ServiceArtifactBucketName":"pt-ecs-workshop-services-artifact-bucket",
+    "ServiceResourceBucketName":"pt-ecs-workshop-services-resource-bucket",
     "ServiceBucketPath":"admin",
-    "ArtifactBucketName":"platform-test-flux7-ecs-workshop"
+    "ArtifactBucketName":"pt-flux7-ecs-workshop"
   }
 }
