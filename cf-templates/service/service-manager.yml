@@ -115,6 +115,10 @@ Resources:
                   - s3:GetObject
                 Resource:
                   - !Sub 'arn:aws:s3:::${ArtifactBucketName}/*' # TODO: narrow down
+      ManagedPolicyArns:
+              - arn:aws:iam::aws:policy/AWSServiceCatalogAdminFullAccess
+
+
   BuildProject:
     Type: "AWS::CodeBuild::Project"
     Properties:
@@ -136,7 +140,8 @@ Resources:
                 - ls
                 - aws s3 sync --delete . s3://${BUCKET_NAME}/${BUCKET_PATH}/
                 - pip install boto3
-                - python scripts/service-catalog.py  --role_arn $ROLE_ARN  --support_email  $SUPPORT_EMAIL  --bucket_name $BUCKET_NAME  --bucket_path $BUCKET_PATH  --portfolio_name $PORTFOLIO_NAME --support_url $SUPPORT_URL
+                - env
+                - python scripts/service-catalog.py   --support_email  $SUPPORT_EMAIL  --bucket_name $BUCKET_NAME  --bucket_path $BUCKET_PATH  --portfolio_name $PORTFOLIO_NAME --support_url $SUPPORT_URL
             post_build:
               commands:
                 - echo Finished sync process
@@ -157,8 +162,6 @@ Resources:
             Value: !Sub ${GitRepo}
           - Name: SUPPORT_URL
             Value: "https://www.flux7.com"
-          - Name: ROLE_ARN
-            Value: "your-role"
 
   ServiceManagerPipeline:
     Type: AWS::CodePipeline::Pipeline
