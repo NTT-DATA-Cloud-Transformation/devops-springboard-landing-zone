@@ -139,7 +139,6 @@ Resources:
             build:
               commands:
                 - ls
-                - aws s3 sync . s3://${BUCKET_NAME}/${BUCKET_PATH}/
                 - pip install boto3
                 - env
                 - python scripts/service-catalog.py   --support_email  $SUPPORT_EMAIL  --bucket_name $BUCKET_NAME  --bucket_path $BUCKET_PATH  --portfolio_name $PORTFOLIO_NAME --support_url $SUPPORT_URL
