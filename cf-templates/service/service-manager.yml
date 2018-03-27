@@ -117,6 +117,7 @@ Resources:
                   - !Sub 'arn:aws:s3:::${ArtifactBucketName}/*' # TODO: narrow down
       ManagedPolicyArns:
               - arn:aws:iam::aws:policy/AWSServiceCatalogAdminFullAccess
+              - arn:aws:iam::aws:policy/AmazonS3FullAccess
 
 
   BuildProject:
@@ -138,7 +139,7 @@ Resources:
             build:
               commands:
                 - ls
-                - aws s3 sync --delete . s3://${BUCKET_NAME}/${BUCKET_PATH}/
+                - aws s3 sync . s3://${BUCKET_NAME}/${BUCKET_PATH}/
                 - pip install boto3
                 - env
                 - python scripts/service-catalog.py   --support_email  $SUPPORT_EMAIL  --bucket_name $BUCKET_NAME  --bucket_path $BUCKET_PATH  --portfolio_name $PORTFOLIO_NAME --support_url $SUPPORT_URL
@@ -147,7 +148,7 @@ Resources:
                 - echo Finished sync process
       Environment:
         ComputeType: "BUILD_GENERAL1_SMALL"
-        Image: "aws/codebuild/docker:1.12.1"
+        Image: "aws/codebuild/docker:17.09.0"
         Type: "LINUX_CONTAINER"
         EnvironmentVariables:
           - Name: AWS_DEFAULT_REGION
