@@ -138,10 +138,8 @@ Resources:
                 - echo Starting sync process
             build:
               commands:
-                - ls
                 - pip install boto3
-                - env
-                - python scripts/service-catalog.py   --support_email  $SUPPORT_EMAIL  --bucket_name $BUCKET_NAME  --bucket_path $BUCKET_PATH  --portfolio_name $PORTFOLIO_NAME --support_url $SUPPORT_URL
+                - python scripts/service-catalog.py  --log_level $LOG_LEVEL --support_email  $SUPPORT_EMAIL  --bucket_name $BUCKET_NAME  --bucket_path $BUCKET_PATH  --portfolio_name $PORTFOLIO_NAME --support_url $SUPPORT_URL
             post_build:
               commands:
                 - echo Finished sync process
@@ -162,6 +160,8 @@ Resources:
             Value: !Sub ${GitRepo}
           - Name: SUPPORT_URL
             Value: "https://www.flux7.com"
+          - Name: LOG_LEVEL
+            Value: "WARN"
 
   ServiceManagerPipeline:
     Type: AWS::CodePipeline::Pipeline
