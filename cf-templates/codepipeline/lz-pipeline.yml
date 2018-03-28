@@ -142,7 +142,7 @@ Resources:
                 Version: '1'
               Configuration:
                 S3Bucket: !Ref TemplatesBucket
-                S3ObjectKey: !Sub ${RepositoryName}/${GitHubRepoOwner}-${RepositoryName}.zip
+                S3ObjectKey: !Sub ${GitHubRepoOwner}/${RepositoryName}/branch/${BranchName}/${GitHubRepoOwner}_${RepositoryName}_branch_${BranchName}.zip
                 PollForSourceChanges: true
               OutputArtifacts:
                 - Name: S3Artifact
