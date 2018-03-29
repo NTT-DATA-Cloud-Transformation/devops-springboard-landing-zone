@@ -125,7 +125,7 @@ Resources:
     Type: "AWS::CodeBuild::Project"
     Properties:
       Description: !Sub ${GitRepo} to S3 to make available
-      Name: !Sub ${StackPrefix}-upload-service-repo-to-s3
+      Name: !Sub ${StackPrefix}-create-portfolio-and-service-products
       ServiceRole: !Sub ${BuildIamRole.Arn}
       Artifacts:
         Type: CODEPIPELINE
@@ -201,7 +201,7 @@ Resources:
                 Version: 1
                 Provider: CodeBuild
               Configuration:
-                ProjectName: !Sub ${StackPrefix}-upload-service-repo-to-s3
+                ProjectName: !Sub ${StackPrefix}-create-portfolio-and-service-products
               InputArtifacts: [Name: 'GitHubArtifact']
               OutputArtifacts: [Name: 'BuildOutput']
               RunOrder: 20

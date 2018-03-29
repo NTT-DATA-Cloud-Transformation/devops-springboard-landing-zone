@@ -8,7 +8,7 @@ ecs-workshop pipeline we have diff-diff pipeline stages which basically create t
 diff tasks, so if we want to updates stage we can do it by just updating the particular stack 
 or by updating whole pipeline.
 
-The main purpose of ecs-wirkshop pipeline is to create the portfolio for ecs-workshop and then create
+The main purpose of ecs-workshop pipeline is to create the portfolio for ecs-workshop and then create
 the product for all templates available in ecs-service repo 's cf-templates like common/microservices.yml
 This pipeline uses the micro-service architecture for creating the all stages and stacks.
  
@@ -55,6 +55,7 @@ We need to specify the template parameters in following files inside cf-template
 * For network stage inside network/config_params.json.
 * For service manager stage inside service/config_params.json.
 
+* We need to create IamRoleInstanceProfile for ecs instance, currently we are using existing "ecsInstanceRole".
 * StackPrefix 's value in all config_params.json must be smaller than 30 characters.
 * ServiceTemplateBucketName,ServiceArtifactBucketName,ServiceResourceBucketName
   ArtifactBucketName  must be unique because they will be created by service manager stack.
@@ -64,6 +65,16 @@ We need to specify the template parameters in following files inside cf-template
 ## ECS-Workshop pipeline with all stages:
 
 ![](images/aws-amazon-codepipeline.png)
+
+### ECS-Workshop-Main-Stack
+
+When we deploy the code pipeline template lz-pipeline.yml then it will firstly creates the following
+resources :
+
+* CFNRole.
+* CodePipelineSNSTopic.
+* Pipeline ecs-workshop-pipeline.
+* PipelineRole.
 
 ### FetchFromGitHub Stage:
     
