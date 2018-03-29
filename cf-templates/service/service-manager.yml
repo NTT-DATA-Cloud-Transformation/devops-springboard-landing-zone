@@ -8,6 +8,7 @@ Parameters:
   StackPrefix:
     Type: String
     Description: Prefix used for naming the resources created. ${StackPrefix}-<resource>.
+    MaxLength: 29
   ServiceTemplateBucketName:
     Type: String
     Description: Name for bucket we will use for our library

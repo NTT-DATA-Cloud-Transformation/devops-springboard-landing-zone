@@ -29,6 +29,7 @@ Parameters:
   StackPrefix:
     Description: Stack Prefix
     Type: String
+    MaxLength: 29
   GitHubRepoOwner:
     Description: The repository owner
     Type: String
