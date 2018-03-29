@@ -1,4 +1,4 @@
-#QuickStart ECS-WORKSHOP-LANDING-ZONE
+# QuickStart ECS-WORKSHOP-LANDING-ZONE
 
 This repository can be used to create a pipeline which will deploy the whole AWS architecture for 
 creating the ECS-Workshop-Landing-Zone in any AWS account.The pipeline created by this repo will 
