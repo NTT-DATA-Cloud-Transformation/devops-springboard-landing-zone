@@ -42,7 +42,9 @@ After deploying the git2s3 stack in same region where the pipeline is deployed t
 our Git repo.We need to create a webhook in our git repo to which we want to deploy in our case it is 
 [ecs-workshop-lz](https://github.com/Flux7Labs/ecs-workshop-lz).In this webhook we need to provide the payload
 url.After deploying the git2s3 stack we get output also in output tab.In output tab we will get two api endpoints
-so copy the api endpoint from output tab acc to our use to the payload url.
+so copy the api endpoint from output tab acc to our use to the payload url. in our case we want to use
+GitPullWebHookApi, so copy the GitPullWebHookApi to the payload url.then copy the PublicSSHKey got from output tab in 
+your git hub ssh-keys.
  
 Now if we update our Ecs-workshop-landing-zone repo then it will create zip of our repo and upload only that part
 that is updated.  
