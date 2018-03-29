@@ -31,6 +31,12 @@ the code is updated in github repo so git webhooks will trigger lambda function 
 the output S3 bucket specified in git2s3 stack parameters. 
  
 ![](images/git2s3-arch.png) 
+
+In the stack parameters must sure that specify the S3 bucket name as Output S3 Bucket Name which will be used as source for code 
+pipeline code source.It will not create the bucket.It will upload the repo content to bucket when lambda function is
+triggered by git webhooks. 
+
+Specify API Secret and in Allowed IPs specify our git ip range with cidr.
  
 After deploying the git2s3 stack in same region where the pipeline is deployed then we need to configure
 our Git repo.We need to create a webhook in our git repo to which we want to deploy in our case it is 
@@ -60,7 +66,26 @@ We need to specify the template parameters in following files inside cf-template
 * ServiceTemplateBucketName,ServiceArtifactBucketName,ServiceResourceBucketName
   ArtifactBucketName  must be unique because they will be created by service manager stack.
 * We need to get the latest AMI id for the ecs optimized AMI and then specify it in ecs-cluster/config_params.json file.  
+* Create TemplatesBucket for landing-zone main stack which is created by using lz-pipeline.yml 
+  in same region where we want to deploy code pipeline.
 
+## ECS Workshop Landing Zone Deployment Process:
+
+* After satisfying all prerequisites we need to deploy landing-zone main stack first using  lz-pipeline.yml 
+  so it will deploy the child stack or all the stacks which will deploy landing zone.When we specify parameters in 
+  the landing-zone main stack so be sure that the TemplatesBucket must exist in the same region.  
+  This landing-zone main stack will create following resources:
+  * CFNRole(cloudformation role)
+  * CodePipelineSNSTopic
+  * Pipeline (ecs-workshop-pipeline in our case)
+  * PipelineRole
+  
+  so inside Pipeline ecs-workshop-pipeline it will create the many stages which are as follows:
+  * FetchfromGitHub.
+  * IAMStackDeploy.
+  * NetworkStackDeploy.
+  * ECSDeployStack.
+  * CreateServiceChangeSetExecution.
 
 ## ECS-Workshop pipeline with all stages:
 
