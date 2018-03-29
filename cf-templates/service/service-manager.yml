@@ -135,7 +135,7 @@ Resources:
           phases:
             pre_build:
               commands:
-                - echo Starting Product Creation Process.
+                - echo Starting Product Creation rocess.
             build:
               commands:
                 - pip install boto3
