@@ -16,28 +16,30 @@ This pipeline uses the micro-service architecture for creating the all stages an
 
 ![](images/ecs-workshop-lz-arch.png)
 
-##Prerequisites 
+## Prerequisites 
+
 * We need to implement the git2s3 stack first.
 
- **Git2S3**:
-    This stack creates webhook endpoints and deploys an AWS Lambda function to push
-    your code to Amazon S3 and linking our Git Repository to Amazon S3 and AWS services for continuous code 
-    integration,testing, and deployment.To read about it more visit [git2s3](https://github.com/aws-quickstart/quickstart-git2s3).
+**Git2S3**:
+    
+This stack creates webhook endpoints and deploys an AWS Lambda function to push
+your code to Amazon S3 and linking our Git Repository to Amazon S3 and AWS services for continuous code 
+integration,testing, and deployment.To read about it more visit [git2s3](https://github.com/aws-quickstart/quickstart-git2s3).
      
- This stack basically integrate AWS S3 bucket to our github repo using http endpoints so whenever
- the code is updated in github repo so git webhooks will trigger lambda function which will put the updated files to 
- the output S3 bucket specified in git2s3 stack parameters. 
+This stack basically integrate AWS S3 bucket to our github repo using http endpoints so whenever
+the code is updated in github repo so git webhooks will trigger lambda function which will put the updated files to 
+the output S3 bucket specified in git2s3 stack parameters. 
  
 ![](images/git2s3-arch.png) 
  
- After deploying the git2s3 stack in same region where the pipeline is deployed then we need to configure
- our Git repo.We need to create a webhook in our git repo to which we want to deploy in our case it is 
- [ecs-workshop-lz](https://github.com/Flux7Labs/ecs-workshop-lz).In this webhook we need to provide the payload
- url.After deploying the git2s3 stack we get output also in output tab.In output tab we will get two api endpoints
- so copy the api endpoint from output tab acc to our use to the payload url.
+After deploying the git2s3 stack in same region where the pipeline is deployed then we need to configure
+our Git repo.We need to create a webhook in our git repo to which we want to deploy in our case it is 
+[ecs-workshop-lz](https://github.com/Flux7Labs/ecs-workshop-lz).In this webhook we need to provide the payload
+url.After deploying the git2s3 stack we get output also in output tab.In output tab we will get two api endpoints
+so copy the api endpoint from output tab acc to our use to the payload url.
  
- Now if we update our Ecs-workshop-landing-zone repo then it will create zip of our repo and upload only that part
- that is updated.  
+Now if we update our Ecs-workshop-landing-zone repo then it will create zip of our repo and upload only that part
+that is updated.  
 
 * We need to create a key-pair for ecs cluster instance in same account and region.
  
@@ -59,7 +61,7 @@ We need to specify the template parameters in following files inside cf-template
 * We need to get the latest AMI id for the ecs optimized AMI and then specify it in ecs-cluster/config_params.json file.  
 
 
-##Diagram of ecs-workshop pipeline with all stages:
+## ECS-Workshop pipeline with all stages:
 
 ![](images/aws-amazon-codepipeline.png)
 
