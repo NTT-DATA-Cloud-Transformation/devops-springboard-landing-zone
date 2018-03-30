@@ -148,6 +148,8 @@ stage in ecs workshop pipeline.
 
 ## Landing zone and service repo template organization:
 
+
+
 ![](images/lz-and-service-repo--template-organization.png)
 
 
