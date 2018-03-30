@@ -183,11 +183,19 @@ Resources:
                 Owner: ThirdParty
                 Provider: GitHub
                 Version: 1
+              InputArtifacts:
+                  - Name: S3Artifact
               Configuration:
+                TemplateConfiguration: "S3Artifact::cf-templates/service/config_params.json"
+                TemplatePath: "S3Artifact::cf-templates/service/service-manager.yml"
+                ParameterOverrides:
+                  !Sub |
+                    {
+                      "GitHubToken": "${GitHubToken}"
+                    }
                 Owner: !Ref GitHubUser
                 Repo: !Ref GitRepo
                 Branch: !Ref GitBranch
-                OAuthToken: !Ref GitHubToken
               OutputArtifacts:
                 - Name: GitHubArtifact
               RunOrder: '1'
