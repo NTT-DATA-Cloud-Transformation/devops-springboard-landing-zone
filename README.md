@@ -138,6 +138,7 @@ This stage is used by pipeline to deploy service manager stack which will deploy
 
 ![](images/service-deploy-on-ecs.png)
 
+
 ## Landing zone and service repo template organization:
 
 ![](images/lz-and-service-repo--template-organization.png)
