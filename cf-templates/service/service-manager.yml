@@ -187,7 +187,6 @@ Resources:
                   - Name: S3Artifact
               Configuration:
                 TemplateConfiguration: "S3Artifact::cf-templates/service/config_params.json"
-                TemplatePath: "S3Artifact::cf-templates/service/service-manager.yml"
                 ParameterOverrides:
                   !Sub |
                     {
