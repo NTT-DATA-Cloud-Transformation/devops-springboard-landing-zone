@@ -8,7 +8,6 @@ Parameters:
   StackPrefix:
     Type: String
     Description: Prefix used for naming the resources created. ${StackPrefix}-<resource>.
-    MaxLength: 29
   ServiceTemplateBucketName:
     Type: String
     Description: Name for bucket we will use for our library
@@ -125,7 +124,7 @@ Resources:
     Type: "AWS::CodeBuild::Project"
     Properties:
       Description: !Sub ${GitRepo} to S3 to make available
-      Name: !Sub ${StackPrefix}-create-portfolio-and-service-products
+      Name: !Sub ${StackPrefix}-upload-service-repo-to-s3
       ServiceRole: !Sub ${BuildIamRole.Arn}
       Artifacts:
         Type: CODEPIPELINE
@@ -183,19 +182,11 @@ Resources:
                 Owner: ThirdParty
                 Provider: GitHub
                 Version: 1
-              InputArtifacts:
-                  - Name: S3Artifact
               Configuration:
-                TemplateConfiguration: "S3Artifact::cf-templates/service/config_params.json"
-                TemplatePath: "S3Artifact::cf-templates/service/service-manager.yml"
-                ParameterOverrides:
-                  !Sub |
-                    {
-                      "GitHubToken": "${GitHubToken}"
-                    }
                 Owner: !Ref GitHubUser
                 Repo: !Ref GitRepo
                 Branch: !Ref GitBranch
+                OAuthToken: !Ref GitHubToken
               OutputArtifacts:
                 - Name: GitHubArtifact
               RunOrder: '1'
@@ -209,7 +200,7 @@ Resources:
                 Version: 1
                 Provider: CodeBuild
               Configuration:
-                ProjectName: !Sub ${StackPrefix}-create-portfolio-and-service-products
+                ProjectName: !Sub ${StackPrefix}-upload-service-repo-to-s3
               InputArtifacts: [Name: 'GitHubArtifact']
               OutputArtifacts: [Name: 'BuildOutput']
               RunOrder: 20
