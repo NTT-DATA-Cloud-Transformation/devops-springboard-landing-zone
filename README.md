@@ -126,28 +126,61 @@ by pipeline so pipeline can update the ecs deploy stack.
 
 ![](images/ecs-cluster.png)
 
-### CreateServiceChangeSetExecution
+### CreateServiceChangeSetExecution:
 
 This stage is used by pipeline to deploy service manager stack which will deploy the service manager iam role
 , our build project in code build and service manager pipeline in code pipeline.
 
 ![](images/service-deploy-on-ecs.png)
 
+
+#### Service Manager Pipeline
+
+It includes two stages which are follows:
+* Source
+* Deploy2S3
+
+The Source stage will get the repository from git which you want to build .
+Deploy2S3 stage will use this repo as source to build the project that was created by CreateServiceChangeSetExecution 
+stage in ecs workshop pipeline.
+
+![](images/service-manager-pipeline-to-build-project.png) 
+
 ## Landing zone and service repo template organization:
 
 ![](images/lz-and-service-repo--template-organization.png)
 
+
 ## AWS Services used in solution:
 
-* EC2
-* Lambda
-* CodeBuild
-* CodePipeline
-* SNS
-* S3
-* CloudWatch
-* 
- 
+* [EC2](https://aws.amazon.com/ec2/): EC2 to create instances for ECS cluster, Load Balancer , Target Groups,
+* [Lambda](https://aws.amazon.com/lambda/): Lambda function to retrieve your code from API Gateway and to place it in Amazon S3.
+* [CodeBuild](https://aws.amazon.com/codebuild/) : CodeBuild to create project and build project.
+* [CodePipeline](https://aws.amazon.com/codepipeline/) : CodePipeline to create pipeline which will deploy the all stack to create landing zone and also 
+                     to make the solution intelligent when ever changes are detected in respective repo in git
+                     then git webhook is triggered and pipeline is updated and also all stages are also updated.
+* [SNS](https://aws.amazon.com/sns/): SNS to notify about ecs pipeline to the owner of git repo and project.
+* [Amazon S3](https://aws.amazon.com/s3/) : Amazon S3 to store code files like templates and lambda function and SSH private keys.
+* [CloudWatch](https://aws.amazon.com/cloudwatch/): CloudWatch to store ,access and analysis logs. 
+* [API Gateway](https://aws.amazon.com/api-gateway/): API Gateway to receive the webhook request from your Git service and to
+                   forward it to Lambda.
+* [KMS](https://aws.amazon.com/kms/): KMS is used to encrypt the Secure Shell (SSH) private key that is generated at launch. 
+           The GitPull method uses the private key for SSH authentication of your Git repository.
+* [IAM](https://aws.amazon.com/iam/): AWS Identity and Access Management (IAM) is a web service for securely
+           controlling access to AWS services. With IAM, you can centrally manage users, security
+           credentials such as access keys, and permissions that control which AWS resources
+           users and applications can access.
+* [AWS Auto Scaling](https://aws.amazon.com/autoscaling/): AWS Auto Scaling to scale the ECS cluster acc to build requirement and Auto Scaling 
+                        Group, Launch Configurations.
+* [CloudFormation](https://aws.amazon.com/cloudformation/): CloudFormation to deploy the all stacks which are initiated by pipeline.
+* [Service Catalog](https://aws.amazon.com/servicecatalog): Service Catalog to create portfolio for ecs workshop and products for each
+                        micro-service pipeline. 
+* [VPC](https://aws.amazon.com/vpc/): VPC to create Private & Public Subnets, Route Tables,Internet Gateway, NatGateway,Security Groups
+           Network ACLs. 
+* [ECS](https://aws.amazon.com/ecs/): ECS to create our cluster on which we will build our project and this cluster is elastic in 
+           size means can shrink and expand automatically according to need of build.  
+* [ElasticLoadBalancingV2](https://aws.amazon.com/elasticloadbalancing/) : ElasticLoadBalancing to deploy load balancers to handle and distribute 
+                               the load according to resource utilization. 
 
 
 
