@@ -141,6 +141,8 @@ This stage is used by pipeline to deploy service manager stack which will deploy
 ## Landing zone and service repo template organization:
 
 ![](images/lz-and-service-repo--template-organization.png)
+
+## Further Steps:
  
 
 
