@@ -186,7 +186,6 @@ Resources:
               InputArtifacts:
                   - Name: S3Artifact
               Configuration:
-                TemplateConfiguration: "S3Artifact::cf-templates/service/config_params.json"
                 ParameterOverrides:
                   !Sub |
                     {
