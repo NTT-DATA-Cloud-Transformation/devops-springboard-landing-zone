@@ -133,7 +133,7 @@ Resources:
       Name: ecs-workshop-pipeline
       RoleArn: !GetAtt PipelineRole.Arn
       Stages:
-        - Name: FetchfromGitHub
+        - Name: FetchFromGitHub
           Actions:
             - Name: TemplateSource
               ActionTypeId:
@@ -267,7 +267,6 @@ Resources:
                   !Sub |
                     {
                       "GitHubUser": "${GitHubRepoOwner}",
-                      "GitHubToken": "${OAuthToken}",
                       "ArtifactBucketName": "${TemplatesBucket}",
                       "PipelineIamRoleArn": "${PipelineRole.Arn}"
                     }

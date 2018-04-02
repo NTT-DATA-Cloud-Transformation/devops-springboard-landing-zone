@@ -35,11 +35,6 @@ Parameters:
   GitBranch:
     Description: 'Branch being deployed'
     Type: 'String'
-  GitHubToken:
-    Description: 'OAuth Token for repo access'
-    Type: 'String'
-    Default: ""
-    NoEcho: true
 
 Resources:
   ServiceTemplateBucket:
@@ -123,8 +118,8 @@ Resources:
   BuildProject:
     Type: "AWS::CodeBuild::Project"
     Properties:
-      Description: !Sub ${GitRepo} to S3 to make available
-      Name: !Sub ${StackPrefix}-upload-service-repo-to-s3
+      Description: To create portfolio and product for microservices in ecs-workshop-service repo
+      Name: !Sub ${StackPrefix}-create-portfolio-and-products
       ServiceRole: !Sub ${BuildIamRole.Arn}
       Artifacts:
         Type: CODEPIPELINE
@@ -170,25 +165,26 @@ Resources:
       ArtifactStore:
         Location: !Ref ArtifactBucketName
         Type: 'S3'
+      DisableInboundStageTransitions: []
+      RestartExecutionOnUpdate: true
       RoleArn: !Ref PipelineIamRoleArn
       Stages:
         -
-          Name: Source
+          Name: FetchServiceRepoFromGithub
           Actions:
             -
               Name: AppRepoSource
               ActionTypeId:
                 Category: Source
-                Owner: ThirdParty
-                Provider: GitHub
-                Version: 1
+                Owner: AWS
+                Provider: S3
+                Version: '1'
               Configuration:
-                Owner: !Ref GitHubUser
-                Repo: !Ref GitRepo
-                Branch: !Ref GitBranch
-                OAuthToken: !Ref GitHubToken
+                S3Bucket: !Ref ArtifactBucketName
+                S3ObjectKey: !Sub ${GitHubUser}/${GitRepo}/branch/${GitBranch}/${GitHubUser}_${GitRepo}_branch_${GitBranch}.zip
+                PollForSourceChanges: true
               OutputArtifacts:
-                - Name: GitHubArtifact
+                - Name: S3Artifact
               RunOrder: '1'
         - Name: Deploy2S3
         # Use CodeBuild to deploy the templates to S3
@@ -200,7 +196,7 @@ Resources:
                 Version: 1
                 Provider: CodeBuild
               Configuration:
-                ProjectName: !Sub ${StackPrefix}-upload-service-repo-to-s3
+                ProjectName: !Sub ${StackPrefix}-create-portfolio-and-products
               InputArtifacts: [Name: 'GitHubArtifact']
               OutputArtifacts: [Name: 'BuildOutput']
               RunOrder: 20
