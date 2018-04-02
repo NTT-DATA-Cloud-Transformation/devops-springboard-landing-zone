@@ -185,6 +185,32 @@ stage in ecs workshop pipeline.
                                the load according to resource utilization. 
 
 
+## IAM permissions required to deploy pipeline:
+
+* **AmazonS3FullAccess:** For uploading and sync the templates in S3 bucket.
+* **AWSServiceCatalogAdminFullAccess:** For create and access portfolio and product as admin.
+* **CodeBuildStandardPolicy:** For create Log Groups,Log Streams, put log events , access cloud watch logs,s3 get object 
+  for access artifacts store.
+* **SyncToTemplatesBucket:** For sync content between bucket and repo.
+* **AmazonEC2ContainerServiceRole:**
+            
+  * ec2:AuthorizeSecurityGroupIngress,Describe*,
+  * elasticloadbalancing:Deregister/Register InstancesFromLoadBalancer ,Deregister/Register Targets,Describe*
+ 
+* **CloudFormationRole:** Admin inline policy.
+* **Pipeline-Role (CodePipeline As Trusted Advisor):** It will give permissions to CodePipeline for following:
+  * s3:*
+  * codebuild:*
+  * cloudformation:Create/Describe/Delete/Update Stack,
+                   Create/Execute/Delete/Describe ChangeSet,
+                   SetStackPolicy,
+  * iam:PassRole
+  * sns:Publish
+  * codecommit:BatchGetRepositories,Get*,GitPull,List*,Update*,Test*,UploadArchive.
+* **AmazonEC2ContainerServiceforEC2Role:**  Used as ecsInstanceRole.  
+  
+                       
+ 
 
  
 
