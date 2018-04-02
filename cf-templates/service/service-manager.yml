@@ -197,7 +197,7 @@ Resources:
                 Provider: CodeBuild
               Configuration:
                 ProjectName: !Sub ${StackPrefix}-create-portfolio-and-products
-              InputArtifacts: [Name: 'GitHubArtifact']
+              InputArtifacts: [Name: 'S3Artifact']
               OutputArtifacts: [Name: 'BuildOutput']
               RunOrder: 20
 Outputs:
