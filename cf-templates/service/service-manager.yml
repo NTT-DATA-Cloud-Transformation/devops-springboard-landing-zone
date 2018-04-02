@@ -134,6 +134,8 @@ Resources:
             build:
               commands:
                 - pip install boto3
+                - ls
+                - env
                 - python scripts/service-catalog.py  --log_level $LOG_LEVEL --support_email  $SUPPORT_EMAIL  --bucket_name $BUCKET_NAME  --bucket_path $BUCKET_PATH  --portfolio_name $PORTFOLIO_NAME --support_url $SUPPORT_URL
             post_build:
               commands:
