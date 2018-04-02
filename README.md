@@ -207,7 +207,7 @@ stage in ecs workshop pipeline.
   * iam:PassRole
   * sns:Publish
   * codecommit:BatchGetRepositories,Get*,GitPull,List*,Update*,Test*,UploadArchive.
-* **AmazonEC2ContainerServiceforEC2Role:**  Used as ecsInstanceRole.  
+* **AmazonEC2ContainerServiceforEC2Role:**  Used as ecsInstanceRole for ecs cluster.  
   
                        
  
