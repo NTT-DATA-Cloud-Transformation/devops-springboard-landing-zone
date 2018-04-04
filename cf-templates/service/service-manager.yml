@@ -35,11 +35,6 @@ Parameters:
   GitBranch:
     Description: 'Branch being deployed'
     Type: 'String'
-  GitHubToken:
-    Description: 'OAuth Token for repo access'
-    Type: 'String'
-    Default: ""
-    NoEcho: true
 
 Resources:
   ServiceTemplateBucket:
@@ -115,11 +110,16 @@ Resources:
                   - s3:GetObject
                 Resource:
                   - !Sub 'arn:aws:s3:::${ArtifactBucketName}/*' # TODO: narrow down
+      ManagedPolicyArns:
+              - arn:aws:iam::aws:policy/AWSServiceCatalogAdminFullAccess
+              - arn:aws:iam::aws:policy/AmazonS3FullAccess
+
+
   BuildProject:
     Type: "AWS::CodeBuild::Project"
     Properties:
-      Description: !Sub ${GitRepo} to S3 to make available
-      Name: !Sub ${StackPrefix}-upload-service-repo-to-s3
+      Description: To create portfolio and product for microservices in ecs-workshop-service repo
+      Name: !Sub ${StackPrefix}-create-portfolio-and-products
       ServiceRole: !Sub ${BuildIamRole.Arn}
       Artifacts:
         Type: CODEPIPELINE
@@ -130,16 +130,17 @@ Resources:
           phases:
             pre_build:
               commands:
-                - echo Starting sync process
+                - echo Starting Product Creation rocess.
             build:
               commands:
-                - aws s3 sync --delete . s3://${BUCKET_NAME}/${BUCKET_PATH}/
+                - pip install boto3
+                - python scripts/service-catalog.py  --log_level $LOG_LEVEL --support_email  $SUPPORT_EMAIL  --bucket_name $BUCKET_NAME  --bucket_path $BUCKET_PATH  --portfolio_name $PORTFOLIO_NAME --support_url $SUPPORT_URL
             post_build:
               commands:
-                - echo Finished sync process
+                - echo Finished product Creation Process.
       Environment:
         ComputeType: "BUILD_GENERAL1_SMALL"
-        Image: "aws/codebuild/docker:1.12.1"
+        Image: "aws/codebuild/docker:17.09.0"
         Type: "LINUX_CONTAINER"
         EnvironmentVariables:
           - Name: AWS_DEFAULT_REGION
@@ -148,6 +149,14 @@ Resources:
             Value: !Sub ${ServiceTemplateBucket}
           - Name: BUCKET_PATH
             Value: !Sub ${ServiceBucketPath}/${GitRepo}
+          - Name: SUPPORT_EMAIL
+            Value: "mohit@flux7.com"
+          - Name: PORTFOLIO_NAME
+            Value: !Sub ${GitRepo}
+          - Name: SUPPORT_URL
+            Value: "https://www.flux7.com"
+          - Name: LOG_LEVEL
+            Value: "WARN"
 
   ServiceManagerPipeline:
     Type: AWS::CodePipeline::Pipeline
@@ -156,25 +165,26 @@ Resources:
       ArtifactStore:
         Location: !Ref ArtifactBucketName
         Type: 'S3'
+      DisableInboundStageTransitions: []
+      RestartExecutionOnUpdate: true
       RoleArn: !Ref PipelineIamRoleArn
       Stages:
         -
-          Name: Source
+          Name: FetchServiceRepoFromGithub
           Actions:
             -
               Name: AppRepoSource
               ActionTypeId:
                 Category: Source
-                Owner: ThirdParty
-                Provider: GitHub
-                Version: 1
+                Owner: AWS
+                Provider: S3
+                Version: '1'
               Configuration:
-                Owner: !Ref GitHubUser
-                Repo: !Ref GitRepo
-                Branch: !Ref GitBranch
-                OAuthToken: !Ref GitHubToken
+                S3Bucket: !Ref ArtifactBucketName
+                S3ObjectKey: !Sub ${GitHubUser}/${GitRepo}/branch/${GitBranch}/${GitHubUser}_${GitRepo}_branch_${GitBranch}.zip
+                PollForSourceChanges: true
               OutputArtifacts:
-                - Name: GitHubArtifact
+                - Name: S3Artifact
               RunOrder: '1'
         - Name: Deploy2S3
         # Use CodeBuild to deploy the templates to S3
@@ -186,8 +196,8 @@ Resources:
                 Version: 1
                 Provider: CodeBuild
               Configuration:
-                ProjectName: !Sub ${StackPrefix}-upload-service-repo-to-s3
-              InputArtifacts: [Name: 'GitHubArtifact']
+                ProjectName: !Sub ${StackPrefix}-create-portfolio-and-products
+              InputArtifacts: [Name: 'S3Artifact']
               OutputArtifacts: [Name: 'BuildOutput']
               RunOrder: 20
 Outputs:

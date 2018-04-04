@@ -29,6 +29,7 @@ Parameters:
   StackPrefix:
     Description: Stack Prefix
     Type: String
+    MaxLength: 29
   GitHubRepoOwner:
     Description: The repository owner
     Type: String
@@ -132,7 +133,7 @@ Resources:
       Name: ecs-workshop-pipeline
       RoleArn: !GetAtt PipelineRole.Arn
       Stages:
-        - Name: FetchfromGitHub
+        - Name: FetchFromGitHub
           Actions:
             - Name: TemplateSource
               ActionTypeId:
@@ -142,11 +143,12 @@ Resources:
                 Version: '1'
               Configuration:
                 S3Bucket: !Ref TemplatesBucket
-                S3ObjectKey: !Sub ${RepositoryName}/${GitHubRepoOwner}-${RepositoryName}.zip
+                S3ObjectKey: !Sub ${GitHubRepoOwner}/${RepositoryName}/branch/${BranchName}/${GitHubRepoOwner}_${RepositoryName}_branch_${BranchName}.zip
                 PollForSourceChanges: true
               OutputArtifacts:
                 - Name: S3Artifact
               RunOrder: '1'
+
         - Name: IAMStackDeploy
           Actions:
             - Name: IAMCreateChangeSet
@@ -265,7 +267,6 @@ Resources:
                   !Sub |
                     {
                       "GitHubUser": "${GitHubRepoOwner}",
-                      "GitHubToken": "${OAuthToken}",
                       "ArtifactBucketName": "${TemplatesBucket}",
                       "PipelineIamRoleArn": "${PipelineRole.Arn}"
                     }
