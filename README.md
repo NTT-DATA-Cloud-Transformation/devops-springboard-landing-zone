@@ -183,6 +183,9 @@ stage in ecs workshop pipeline.
            size means can shrink and expand automatically according to need of build.  
 * [ElasticLoadBalancingV2](https://aws.amazon.com/elasticloadbalancing/) : ElasticLoadBalancing to deploy load balancers to handle and distribute 
                                the load according to resource utilization. 
+* [CloudTrail](https://aws.amazon.com/cloudtrail): CloudTrail to track all activity across landing zone ans also for security compliance.
+* [AWS Config](https://aws.amazon.com/config/): AWS Config to enables us to assess, audit, and evaluate the configurations of our landing zone
+                                                AWS resources.                            
 
 
 ## IAM permissions required to deploy pipeline:
