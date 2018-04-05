@@ -5,6 +5,9 @@ Metadata:
   # Others
 
 Parameters:
+  SupportEmail:
+    Type: String
+    Description: Email used for the support purpose in service catalog products.
   StackPrefix:
     Type: String
     Description: Prefix used for naming the resources created. ${StackPrefix}-<resource>.
@@ -115,6 +118,11 @@ Resources:
                   - s3:GetObject
                 Resource:
                   - !Sub 'arn:aws:s3:::${ArtifactBucketName}/*' # TODO: narrow down
+      ManagedPolicyArns:
+              - arn:aws:iam::aws:policy/AWSServiceCatalogAdminFullAccess
+              - arn:aws:iam::aws:policy/AmazonS3FullAccess
+
+
   BuildProject:
     Type: "AWS::CodeBuild::Project"
     Properties:
@@ -130,16 +138,17 @@ Resources:
           phases:
             pre_build:
               commands:
-                - echo Starting sync process
+                - echo Starting product creation process.
             build:
               commands:
-                - aws s3 sync --delete . s3://${BUCKET_NAME}/${BUCKET_PATH}/
+                - pip install boto3
+                - python scripts/service-catalog.py  --log_level $LOG_LEVEL --support_email  $SUPPORT_EMAIL  --bucket_name $BUCKET_NAME  --bucket_path $BUCKET_PATH  --portfolio_name $PORTFOLIO_NAME --support_url $SUPPORT_URL
             post_build:
               commands:
-                - echo Finished sync process
+                - echo Finished product creation process.
       Environment:
         ComputeType: "BUILD_GENERAL1_SMALL"
-        Image: "aws/codebuild/docker:1.12.1"
+        Image: "aws/codebuild/docker:17.09.0"
         Type: "LINUX_CONTAINER"
         EnvironmentVariables:
           - Name: AWS_DEFAULT_REGION
@@ -148,6 +157,14 @@ Resources:
             Value: !Sub ${ServiceTemplateBucket}
           - Name: BUCKET_PATH
             Value: !Sub ${ServiceBucketPath}/${GitRepo}
+          - Name: SUPPORT_EMAIL
+            Value: !Ref SupportEmail
+          - Name: PORTFOLIO_NAME
+            Value: !Sub ${GitRepo}
+          - Name: SUPPORT_URL
+            Value: "https://www.flux7.com"
+          - Name: LOG_LEVEL
+            Value: "WARN"
 
   ServiceManagerPipeline:
     Type: AWS::CodePipeline::Pipeline

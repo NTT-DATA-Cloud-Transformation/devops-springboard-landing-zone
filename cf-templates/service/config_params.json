@@ -1,12 +1,14 @@
 {
   "Parameters" : {
-    "StackPrefix": "ecs-workshop",
+    "StackPrefix": "pt-ecs-ws",
     "GitRepo":"ecs-workshop-service",
-    "GitBranch":"master",
-    "ServiceTemplateBucketName":"ecs-workshop-services-template-bucket",
-    "ServiceArtifactBucketName":"ecs-workshop-services-artifact-bucket",
-    "ServiceResourceBucketName":"ecs-workshop-services-resource-bucket",
+    "GitBranch":"feat-launch-type",
+    "GitHubUser":"mohitkumarsharmaflux7",
+    "ServiceTemplateBucketName":"pt-ecs-ws-services-template-bucket",
+    "ServiceArtifactBucketName":"pt-ecs-ws-services-artifact-bucket",
+    "ServiceResourceBucketName":"pt-ecs-ws-services-resource-bucket",
     "ServiceBucketPath":"admin",
-    "ArtifactBucketName":"flux7-ecs-workshop"
+    "ArtifactBucketName":"pt-flux7-ecs-ws",
+    "SupportEmail": "mohit@flux7.com"
   }
 }
