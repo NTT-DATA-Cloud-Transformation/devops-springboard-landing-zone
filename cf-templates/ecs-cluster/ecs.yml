@@ -80,7 +80,7 @@ Conditions:
     - Fn::Equals:
       - Ref: KeyName
       - ''
-  EC2LT: Equals [ !Ref LaunchType, "EC2" ]
+  EC2LT: !Equals [ !Ref LaunchType, "EC2" ]
 
 Resources:
   EcsSecurityGroup:
