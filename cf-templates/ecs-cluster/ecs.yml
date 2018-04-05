@@ -119,6 +119,7 @@ Resources:
         Fn::ImportValue: !Sub ${StackPrefix}-VpcId
       GroupDescription: Service ALB SG
   EcsInstanceAsg:
+    Condition: EC2LT
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       VPCZoneIdentifier:
@@ -144,7 +145,7 @@ Resources:
           - - 'ECS Instance - '
             - Ref: AWS::StackName
         PropagateAtLaunch: 'true'
-    Condition: EC2LT
+
 
   ECSLoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
@@ -171,6 +172,7 @@ Resources:
         TargetGroupArn: !Ref DefaultTargetGroup
 
   EcsInstanceLc:
+    Condition: EC2LT
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
       ImageId:
@@ -193,7 +195,7 @@ Resources:
             #!/bin/bash
             echo ECS_CLUSTER=${EcsClusterName} >> /etc/ecs/ecs.config
             #echo ECS_BACKEND_HOST=${EcsEndpoint} >> /etc/ecs/ecs.config
-    Condition: EC2LT
+
 
   DefaultTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
@@ -215,9 +217,9 @@ Outputs:
       Name: !Sub ${StackPrefix}-default-tg
   EcsInstanceLc:
     Value: !Ref EcsInstanceLc
+    Condition: EC2LT
     Export:
       Name: !Sub ${StackPrefix}-instance-lc
-    Condition: EC2LT
   LoadBalancerListener:
     Value:  !Ref LoadBalancerListener
     Export:
