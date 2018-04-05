@@ -71,8 +71,8 @@ Parameters:
     Type: String
     Default: "FARGATE"
     AllowedValues:
-      - "FARGATE"
-      - "EC2"
+      - FARGATE
+      - EC2
 
 Conditions:
   CreateEC2LCWithKeyPair:
@@ -80,10 +80,7 @@ Conditions:
     - Fn::Equals:
       - Ref: KeyName
       - ''
-  EC2LT:
-    - Fn::Equals:
-       - !Ref LaunchType
-       - "EC2"
+  EC2LT: Equals [ !Ref LaunchType, EC2 ]
 
 Resources:
   EcsSecurityGroup:
