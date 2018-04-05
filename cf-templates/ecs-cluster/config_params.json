@@ -13,6 +13,7 @@
     "EcsEndpoint": "platform-test-ecs-workshop",
     "KeyName": "platform-test-ecs-workshop",
     "StackPrefix": "pt-ecs-ws",
-    "EcsAmiId" : "ami-04351e12"
+    "EcsAmiId" : "ami-04351e12",
+    "LaunchType" : "FARGATE"
   }
 }
