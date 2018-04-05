@@ -32,11 +32,11 @@ This pipeline uses the micro-service architecture for creating the all stages an
     the code is updated in github repo so git webhooks will trigger lambda function which will put the updated files to 
     the output S3 bucket specified in git2s3 stack parameters. 
  
-    ![](images/git2s3-arch.png) 
+    ![](images/git2s3-arch.png)
 
     In the stack parameters must sure that specify the S3 bucket name as Output S3 Bucket Name which will be used as source for code 
     pipeline code source.Git2s3 stack will create the template S3 bucket as output S3 bucket .It will upload the repo content to bucket when lambda function is
-    triggered by git webhooks. 
+    triggered by git web hooks. 
 
     Physical resources created by git2s3 are following:
     * Output S3 bucket which will be used as Template bucket.
