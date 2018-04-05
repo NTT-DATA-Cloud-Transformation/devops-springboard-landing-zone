@@ -19,19 +19,6 @@ Parameters:
     Description: Optional - Name of an existing EC2 KeyPair to enable SSH access to
       the ECS instances
     Default: ''
-  EcsInstanceType:
-    Type: String
-    Description: ECS EC2 instance type
-    Default: t2.micro
-    ConstraintDescription: must be a valid EC2 instance type.
-  AsgMaxSize:
-    Type: Number
-    Description: Maximum size and initial Desired Capacity of ECS Auto Scaling Group
-    Default: '2'
-  AsgMinSize:
-    Type: Number
-    Description: Minimum size of ECS Auto Scaling Group
-    Default: '2'
   IamRoleInstanceProfile:
     Type: String
     Description: Name or the Amazon Resource Name (ARN) of the instance profile associated
@@ -109,32 +96,6 @@ Resources:
       VpcId:
         Fn::ImportValue: !Sub ${StackPrefix}-VpcId
       GroupDescription: Service ALB SG
-  EcsInstanceAsg:
-    Type: AWS::AutoScaling::AutoScalingGroup
-    Properties:
-      VPCZoneIdentifier:
-      - Fn::Join:
-        - ","
-        - - Fn::ImportValue:
-              !Sub ${StackPrefix}-Public-Subnet-0
-          - Fn::ImportValue:
-              !Sub ${StackPrefix}-Public-Subnet-1
-      LaunchConfigurationName:
-        Ref: EcsInstanceLc
-      MinSize:
-        Ref: AsgMinSize
-      MaxSize:
-        Ref: AsgMaxSize
-      DesiredCapacity:
-        Ref: AsgMaxSize
-      Tags:
-      - Key: Name
-        Value:
-          Fn::Join:
-          - ''
-          - - 'ECS Instance - '
-            - Ref: AWS::StackName
-        PropagateAtLaunch: 'true'
 
   ECSLoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
@@ -160,29 +121,7 @@ Resources:
       - Type: forward
         TargetGroupArn: !Ref DefaultTargetGroup
 
-  EcsInstanceLc:
-    Type: AWS::AutoScaling::LaunchConfiguration
-    Properties:
-      ImageId:
-        Ref: EcsAmiId
-      InstanceType:
-        Ref: EcsInstanceType
-      AssociatePublicIpAddress: true
-      IamInstanceProfile:
-        Ref: IamRoleInstanceProfile
-      KeyName:
-        Fn::If:
-        - CreateEC2LCWithKeyPair
-        - Ref: KeyName
-        - Ref: AWS::NoValue
-      SecurityGroups:
-      - Ref: EcsSecurityGroup
-      UserData:
-        Fn::Base64:
-          !Sub |
-            #!/bin/bash
-            echo ECS_CLUSTER=${EcsClusterName} >> /etc/ecs/ecs.config
-            #echo ECS_BACKEND_HOST=${EcsEndpoint} >> /etc/ecs/ecs.config
+
   DefaultTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
@@ -201,10 +140,6 @@ Outputs:
     Value: !Ref DefaultTargetGroup
     Export:
       Name: !Sub ${StackPrefix}-default-tg
-  EcsInstanceLc:
-    Value: !Ref EcsInstanceLc
-    Export:
-      Name: !Sub ${StackPrefix}-instance-lc
   LoadBalancerListener:
     Value:  !Ref LoadBalancerListener
     Export:
