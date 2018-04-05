@@ -2,7 +2,7 @@
   "Parameters" : {
     "StackPrefix": "pt-ecs-ws",
     "GitRepo":"ecs-workshop-service",
-    "GitBranch":"feat-launch-type",
+    "GitBranch":"feat-fargate",
     "GitHubUser":"mohitkumarsharmaflux7",
     "ServiceTemplateBucketName":"pt-ecs-ws-services-template-bucket",
     "ServiceArtifactBucketName":"pt-ecs-ws-services-artifact-bucket",
