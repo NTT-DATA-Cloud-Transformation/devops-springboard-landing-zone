@@ -5,6 +5,9 @@ Metadata:
   # Others
 
 Parameters:
+  SupportEmail:
+    Type: String
+    Description: Email used for the support purpose in service catalog products.
   StackPrefix:
     Type: String
     Description: Prefix used for naming the resources created. ${StackPrefix}-<resource>.
@@ -135,14 +138,14 @@ Resources:
           phases:
             pre_build:
               commands:
-                - echo Starting Product Creation rocess.
+                - echo Starting product creation process.
             build:
               commands:
                 - pip install boto3
                 - python scripts/service-catalog.py  --log_level $LOG_LEVEL --support_email  $SUPPORT_EMAIL  --bucket_name $BUCKET_NAME  --bucket_path $BUCKET_PATH  --portfolio_name $PORTFOLIO_NAME --support_url $SUPPORT_URL
             post_build:
               commands:
-                - echo Finished product Creation Process.
+                - echo Finished product creation process.
       Environment:
         ComputeType: "BUILD_GENERAL1_SMALL"
         Image: "aws/codebuild/docker:17.09.0"
@@ -155,7 +158,7 @@ Resources:
           - Name: BUCKET_PATH
             Value: !Sub ${ServiceBucketPath}/${GitRepo}
           - Name: SUPPORT_EMAIL
-            Value: "mohit@flux7.com"
+            Value: !Ref SupportEmail
           - Name: PORTFOLIO_NAME
             Value: !Sub ${GitRepo}
           - Name: SUPPORT_URL

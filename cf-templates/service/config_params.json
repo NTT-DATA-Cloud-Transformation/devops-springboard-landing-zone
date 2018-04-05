@@ -8,6 +8,7 @@
     "ServiceArtifactBucketName":"pt-ecs-ws-services-artifact-bucket",
     "ServiceResourceBucketName":"pt-ecs-ws-services-resource-bucket",
     "ServiceBucketPath":"admin",
-    "ArtifactBucketName":"pt-flux7-ecs-ws"
+    "ArtifactBucketName":"pt-flux7-ecs-ws",
+    "SupportEmail": "mohit@flux7.com"
   }
 }

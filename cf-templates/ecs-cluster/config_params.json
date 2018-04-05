@@ -1,6 +1,6 @@
 {
   "Parameters": {
-    "EcsClusterName": "pt-ecs-workshop-cluster",
+    "EcsClusterName": "ecs-workshop-cluster",
     "EcsInstanceType": "t2.micro",
     "AsgMaxSize": "2",
     "AsgMinSize": "2",    
