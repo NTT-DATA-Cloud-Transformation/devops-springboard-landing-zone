@@ -1,6 +1,5 @@
 {
   "Parameters" : {
-    "StackPrefix": "ecs-workshop",
     "GitRepo":"ecs-workshop-service",
     "GitBranch":"master",
     "GitHubUser":"Flux7Labs",
@@ -8,7 +7,6 @@
     "ServiceArtifactBucketName":"ecs-ws-services-artifact-bucket",
     "ServiceResourceBucketName":"ecs-ws-services-resource-bucket",
     "ServiceBucketPath":"admin",
-    "ArtifactBucketName":"flux7-ecs-workshop",
-    "SupportEmail": "mohit@flux7.com"
+    "SupportEmail": "support@flux7.com"
   }
 }

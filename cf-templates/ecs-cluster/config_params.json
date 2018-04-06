@@ -12,7 +12,6 @@
     "SourceCidr": "0.0.0.0/0",
     "EcsEndpoint": "ecs-workshop",
     "KeyName": "ecs-workshop",
-    "StackPrefix": "ecs-workshop",
     "EcsAmiId" : "ami-04351e12"
   }
 }
