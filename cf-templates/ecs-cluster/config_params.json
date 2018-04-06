@@ -11,7 +11,6 @@
     "TargetGroupName": "ECSWorkshopTargetGroup",
     "SourceCidr": "0.0.0.0/0",
     "EcsEndpoint": "ecs-workshop",
-    "KeyName": "ecs-workshop",
-    "StackPrefix": "ecs-workshop"
+    "KeyName": "ecs-workshop"
   }
 }
