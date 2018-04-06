@@ -4,9 +4,9 @@
     "GitRepo":"ecs-workshop-service",
     "GitBranch":"master",
     "GitHubUser":"Flux7Labs",
-    "ServiceTemplateBucketName":"ecs-workshop-services-template-bucket",
-    "ServiceArtifactBucketName":"ecs-workshop-services-artifact-bucket",
-    "ServiceResourceBucketName":"ecs-workshop-services-resource-bucket",
+    "ServiceTemplateBucketName":"ecs-ws-services-template-bucket",
+    "ServiceArtifactBucketName":"ecs-ws-services-artifact-bucket",
+    "ServiceResourceBucketName":"ecs-ws-services-resource-bucket",
     "ServiceBucketPath":"admin",
     "ArtifactBucketName":"flux7-ecs-workshop",
     "SupportEmail": "mohit@flux7.com"
