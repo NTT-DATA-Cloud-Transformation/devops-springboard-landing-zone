@@ -29,6 +29,8 @@ Parameters:
   StackPrefix:
     Description: Stack Prefix
     Type: String
+    MaxLength: 29
+
   GitHubRepoOwner:
     Description: The repository owner
     Type: String
@@ -165,6 +167,11 @@ Resources:
                 ChangeSetName: !Sub ${ChangeSetName}-iam
                 TemplateConfiguration:  "S3Artifact::cf-templates/iam/config_params.json"
                 TemplatePath: "S3Artifact::cf-templates/iam/iam.yml"
+                ParameterOverrides:
+                    !Sub |
+                      {
+                        "StackPrefix": "${StackPrefix}"
+                      }
               RunOrder: '1'
             - Name: IAMExecuteChangeSet
               ActionTypeId:
@@ -197,6 +204,11 @@ Resources:
                 ChangeSetName: !Sub ${ChangeSetName}-lz
                 TemplateConfiguration:  "S3Artifact::cf-templates/network/config_params.json"
                 TemplatePath: "S3Artifact::cf-templates/network/network.yml"
+                ParameterOverrides:
+                     !Sub |
+                       {
+                          "StackPrefix": "${StackPrefix}"
+                       }
               RunOrder: '1'
             - Name: NetworkExecuteChangeSet
               ActionTypeId:
@@ -229,6 +241,11 @@ Resources:
                 ChangeSetName: !Sub ${ChangeSetName}-cluster
                 TemplateConfiguration:  "S3Artifact::cf-templates/ecs-cluster/config_params.json"
                 TemplatePath: "S3Artifact::cf-templates/ecs-cluster/ecs.yml"
+                ParameterOverrides:
+                    !Sub |
+                      {
+                        "StackPrefix": "${StackPrefix}"
+                      }
               RunOrder: '1'
             - Name: ExecuteChangeSetEcsCluster
               ActionTypeId:
@@ -267,7 +284,8 @@ Resources:
                       "GitHubUser": "${GitHubRepoOwner}",
                       "GitHubToken": "${OAuthToken}",
                       "ArtifactBucketName": "${TemplatesBucket}",
-                      "PipelineIamRoleArn": "${PipelineRole.Arn}"
+                      "PipelineIamRoleArn": "${PipelineRole.Arn}",
+                      "StackPrefix": "${StackPrefix}"
                     }
               RunOrder: '1'
             - Name: ServiceExecuteChangeSet

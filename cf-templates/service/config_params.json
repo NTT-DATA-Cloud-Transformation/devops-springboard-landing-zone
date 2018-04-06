@@ -1,6 +1,5 @@
 {
   "Parameters" : {
-    "StackPrefix": "ecs-workshop",
     "GitRepo":"ecs-workshop-service",
     "GitBranch":"master",
     "ServiceTemplateBucketName":"ecs-workshop-services-template-bucket",
