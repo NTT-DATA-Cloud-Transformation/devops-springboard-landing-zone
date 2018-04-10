@@ -188,7 +188,7 @@ Resources:
         - Name: Deploy2S3
         # Use CodeBuild to deploy the templates to S3
           Actions:
-            - Name: CodeBuild
+            - Name: CreateUpdateSCProducts
               ActionTypeId:
                 Category: Build
                 Owner: AWS
