@@ -7,9 +7,6 @@ Description: 'CloudFormation template for deploying ECS cluster'
 # 3. Launch seed service
 
 Parameters:
-  EcsClusterName:
-    Type: String
-    Description: The ECS Cluster name
   EcsAmiId:
     Type: String
     Description: ECS AMI Id
@@ -98,7 +95,7 @@ Resources:
   ECSCluster:
     Type: AWS::ECS::Cluster
     Properties:
-      ClusterName: !Ref EcsClusterName
+      ClusterName: !Sub "${StackPrefix}-cluster"
 
   ALBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
