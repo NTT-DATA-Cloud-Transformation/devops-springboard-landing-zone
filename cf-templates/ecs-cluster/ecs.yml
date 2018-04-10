@@ -214,3 +214,11 @@ Outputs:
     Value:  !Sub ${ECSLoadBalancer.DNSName}
     Export:
       Name: !Sub ${StackPrefix}-lb-dns
+  EcsSecurityGroup:
+    Value: !Ref EcsSecurityGroup
+    Export:
+      Name: !Sub ${StackPrefix}-ecs-security-group
+  ALBSecurityGroup:
+    Value: !Ref ALBSecurityGroup
+    Export:
+      Name: !Sub ${StackPrefix}-alb-security-group
