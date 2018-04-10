@@ -7,7 +7,8 @@ Parameters:
     Type: String
     Description: The StackPrefix for all LZ stacks
     Default: ecs-workshop
-    MaxLength: 29
+    MaxLength: 16
+    AllowedPattern: '[a-z0-9\-]+'
 
 Resources:
   EcsServiceRole:

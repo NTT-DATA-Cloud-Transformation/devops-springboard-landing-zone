@@ -29,20 +29,17 @@ Parameters:
   StackPrefix:
     Description: Stack Prefix
     Type: String
-    MaxLength: 29
-  GitHubRepoOwner:
-    Description: The repository owner
+    MaxLength: 16
+    AllowedPattern: '[a-z0-9\-]+'
+  GitUser:
+    Description: 'User/Owner for Git repo'
     Type: String
-  RepositoryName:
-    Description: Repository Name in CodeCommit where nested and child cf-templates reside
-    Type: String
-  BranchName:
-    Description: Repository Branch Name of RepositoryName
-    Type: String
-  OAuthToken:
-    Description: OAuthToken used to authenticate with GitHub
-    Type: String
-    NoEcho: true
+  GitRepo:
+    Description: 'Git repository name'
+    Type: 'String'
+  GitBranch:
+    Description: 'Bit Branch being deployed'
+    Type: 'String'
   Email:
     Description: Email for manual approval of ChangeSet
     Type: String
@@ -133,7 +130,7 @@ Resources:
       Name: ecs-workshop-pipeline
       RoleArn: !GetAtt PipelineRole.Arn
       Stages:
-        - Name: FetchFromGitHub
+        - Name: FetchFromGit
           Actions:
             - Name: TemplateSource
               ActionTypeId:
@@ -143,7 +140,7 @@ Resources:
                 Version: '1'
               Configuration:
                 S3Bucket: !Ref TemplatesBucket
-                S3ObjectKey: !Sub ${GitHubRepoOwner}/${RepositoryName}/branch/${BranchName}/${GitHubRepoOwner}_${RepositoryName}_branch_${BranchName}.zip
+                S3ObjectKey: !Sub ${GitUser}/${GitRepo}/branch/${GitBranch}/${GitUser}_${GitRepo}_branch_${GitBranch}.zip
                 PollForSourceChanges: true
               OutputArtifacts:
                 - Name: S3Artifact
@@ -280,8 +277,7 @@ Resources:
                 ParameterOverrides:
                   !Sub |
                     {
-                      "GitHubUser": "${GitHubRepoOwner}",
-                      "GitHubToken": "${OAuthToken}",
+                      "GitUser": "${GitUser}",
                       "ArtifactBucketName": "${TemplatesBucket}",
                       "PipelineIamRoleArn": "${PipelineRole.Arn}",
                       "StackPrefix": "${StackPrefix}"

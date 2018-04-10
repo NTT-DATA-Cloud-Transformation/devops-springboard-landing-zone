@@ -66,7 +66,8 @@ Parameters:
     Type: String
     Description: String to append before exported outputs
     Default: 'ecs-workshop'
-    MaxLength: 29
+    MaxLength: 16
+    AllowedPattern: '[a-z0-9\-]+'
 Conditions:
   CreateEC2LCWithKeyPair:
     Fn::Not:
