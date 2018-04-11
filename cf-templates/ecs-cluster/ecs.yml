@@ -176,7 +176,7 @@ Resources:
         Fn::Base64:
           !Sub |
             #!/bin/bash
-            echo ECS_CLUSTER=${EcsClusterName} >> /etc/ecs/ecs.config
+            echo ECS_CLUSTER=${ECSCluster} >> /etc/ecs/ecs.config
             #echo ECS_BACKEND_HOST=${EcsEndpoint} >> /etc/ecs/ecs.config
   DefaultTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
