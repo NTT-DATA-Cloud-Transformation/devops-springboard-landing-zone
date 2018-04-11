@@ -7,10 +7,6 @@ Description: 'CloudFormation template for deploying ECS cluster'
 # 3. Launch seed service
 
 Parameters:
-  EcsAmiId:
-    Type: String
-    Description: ECS AMI Id
-    Default: ami-57d9cd2e
   KeyName:
     Type: String
     Description: Optional - Name of an existing EC2 KeyPair to enable SSH access to
@@ -69,6 +65,138 @@ Conditions:
       - ''
 
 Resources:
+  LambdaExecRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      Path: /Common/Lambda/
+      Policies:
+        - PolicyName: Logging
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Action:
+                  - 'logs:CreateLogGroup*'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource: 'arn:aws:logs:*:*:*'
+                Effect: Allow
+        - PolicyName: Ec2DescribeImages
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Action:
+                  - 'ec2:Describe*'
+                Resource: '*'
+                Effect: Allow
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+              - 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+  GetLatestAMILambda:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Description: Custom resource to get latest Amazon Linux/ECS optionmized AMI. block
+      FunctionName: get-latest-amazon-ami
+      MemorySize: 512
+      Handler: index.handler
+      Role:
+        'Fn::GetAtt':
+          - LambdaExecRole
+          - Arn
+      Timeout: 50
+      Runtime: python3.6
+      Code:
+        ZipFile:
+          'Fn::Sub': |
+            import cfnresponse
+            import time
+            import boto3
+            import re
+            AMI_TYPE_MAPPING = {
+              'AMAZON_LINUX': {
+                  'owner': '137112412989',
+                  'ami_name_pattern': 'amzn-ami-hvm-.*-gp2'
+              },
+              'ECS_OPTIMIZED':{
+                  'owner': '591542846629',
+                  'ami_name_pattern': 'amzn-ami-.*-ecs-optimized'
+              }
+            }
+            def handler(event, context):
+              if event['RequestType'] == 'Delete':
+                cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData={"Result":"Delete"})
+                return
+              try:
+                ami_type = event['ResourceProperties']['AMIType']
+                ec2_client = boto3.client('ec2')
+                image = get_latest_AMI(ami_type,ec2_client)
+                responseData = {"ImageId": image['ImageId'], "Name":image['Name']}
+                cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData,image['ImageId'] )
+              except Exception as e:
+                print("something went wrong \n: {0}".format(str(e)))
+                cfnresponse.send(event, context, cfnresponse.FAILED)
+
+            def get_latest_AMI(ami_type, ec2_client):
+              response = ec2_client.describe_images(
+                  Filters = [
+                      {
+                          'Name': 'is-public',
+                          'Values': ['true']
+                      },
+                      {
+                          'Name': 'owner-alias',
+                          'Values': ['amazon']
+                      },
+                      {
+                          'Name': 'virtualization-type',
+                          'Values': ['hvm']
+                      },
+                      {
+                          'Name': 'image-type',
+                          'Values': ['machine']
+                      },
+                      {
+                          'Name': 'root-device-type',
+                          'Values': ['ebs']
+                      },
+                      {
+                          'Name': 'owner-id',
+                          'Values': [AMI_TYPE_MAPPING[ami_type]['owner']]
+                      },
+                      {
+                          'Name': 'block-device-mapping.volume-type',
+                          'Values': ['gp2']
+                      },
+                      {
+                          'Name': 'architecture',
+                          'Values': ['x86_64']
+                      }
+                  ],
+                  Owners=['amazon']
+              )
+              images = response['Images']
+              amazon_hvm = []
+              prog = re.compile(AMI_TYPE_MAPPING[ami_type]['ami_name_pattern'])
+              creation_time_pattern = '%Y-%m-%dT%H:%M:%S.000Z'
+              for image in images:
+                  if prog.match(image['Name']):
+                      if '.rc' not in image['Name']:
+                          amazon_hvm.append(image)
+              latest_image = max(amazon_hvm, key=lambda p: int(time.mktime(time.strptime(p['CreationDate'], creation_time_pattern))))
+              print(latest_image['ImageId'])
+              return latest_image
+  ECSOptimizedAMI:
+    Type: 'Custom::GetLatestAMI'
+    Properties:
+      ServiceToken:
+        !GetAtt GetLatestAMILambda.Arn
+      AMIType: ECS_OPTIMIZED
+      DummyProp: 0
+
   EcsSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -159,7 +287,7 @@ Resources:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
       ImageId:
-        Ref: EcsAmiId
+        Ref: ECSOptimizedAMI
       InstanceType:
         Ref: EcsInstanceType
       AssociatePublicIpAddress: true
