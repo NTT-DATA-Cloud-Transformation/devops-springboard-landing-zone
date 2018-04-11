@@ -2,8 +2,7 @@
   "Parameters": {
     "EcsInstanceType": "t2.micro",
     "AsgMaxSize": "2",
-    "AsgMinSize": "2",    
-    "IamRoleInstanceProfile": "ecsInstanceRole",
+    "AsgMinSize": "2",
     "EcsPort": "80",
     "ElbPort": "80",
     "ElbHealthCheckTarget": "HTTP:80/",

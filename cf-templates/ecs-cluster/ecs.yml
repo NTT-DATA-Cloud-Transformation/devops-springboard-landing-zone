@@ -25,10 +25,6 @@ Parameters:
     Type: Number
     Description: Minimum size of ECS Auto Scaling Group
     Default: '2'
-  IamRoleInstanceProfile:
-    Type: String
-    Description: Name or the Amazon Resource Name (ARN) of the instance profile associated
-      with the IAM role for the instance
   EcsPort:
     Type: String
     Description: Optional - Security Group port to open on ECS instances - defaults
@@ -291,8 +287,7 @@ Resources:
       InstanceType:
         Ref: EcsInstanceType
       AssociatePublicIpAddress: true
-      IamInstanceProfile:
-        Ref: IamRoleInstanceProfile
+      IamInstanceProfile: !Sub "${StackPrefix}-EcsInstanceProfile"
       KeyName:
         Fn::If:
         - CreateEC2LCWithKeyPair
