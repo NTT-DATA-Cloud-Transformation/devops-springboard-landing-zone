@@ -127,7 +127,7 @@ Resources:
         Type: S3
       DisableInboundStageTransitions: []
       RestartExecutionOnUpdate: true
-      Name: ecs-workshop-pipeline
+      Name: !Sub "${StackPrefix}-pipeline"
       RoleArn: !GetAtt PipelineRole.Arn
       Stages:
         - Name: FetchFromGit
@@ -140,7 +140,7 @@ Resources:
                 Version: '1'
               Configuration:
                 S3Bucket: !Ref TemplatesBucket
-                S3ObjectKey: !Sub ${GitUser}/${GitRepo}/${GitBranch}/${GitRepo}.zip
+                S3ObjectKey: !Sub ${GitUser}/${GitRepo}/branch/${GitBranch}/${GitUser}_${GitRepo}_branch_${GitBranch}.zip
                 PollForSourceChanges: true
               OutputArtifacts:
                 - Name: S3Artifact

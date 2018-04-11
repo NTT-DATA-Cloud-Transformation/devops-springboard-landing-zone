@@ -47,10 +47,6 @@ Parameters:
     Type: String
     Description: Optional - Health Check Target for ELB - defaults to HTTP:80/
     Default: HTTP:80/
-  TargetGroupName:
-    Type: String
-    Description: The target group name
-    Default: ECSFirstRunTargetGroup
   SourceCidr:
     Type: String
     Description: Optional - CIDR/IP range for EcsPort and ElbPort - defaults to 0.0.0.0/0
@@ -185,7 +181,7 @@ Resources:
   DefaultTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      Name: !Ref TargetGroupName
+      Name: !Sub "${StackPrefix}-target-group"
       VpcId:
         Fn::ImportValue: !Sub ${StackPrefix}-VpcId
       Port: !Ref ElbPort
