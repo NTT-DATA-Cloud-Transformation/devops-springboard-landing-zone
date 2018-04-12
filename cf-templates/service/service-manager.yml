@@ -192,7 +192,7 @@ Resources:
                 Version: 1
                 Provider: CodeBuild
               Configuration:
-                ProjectName: !Sub ${StackPrefix}-create-portfolio-and-service-products
+                ProjectName: !Ref BuildProject
               InputArtifacts: [Name: 'S3Artifact']
               OutputArtifacts: [Name: 'BuildOutput']
               RunOrder: 20
