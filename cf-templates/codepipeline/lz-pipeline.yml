@@ -48,15 +48,6 @@ Parameters:
     Type: String
 
 Resources:
-  # S3 Bucket created by git2s3
-  #
-  CodePipelineSNSTopic:
-    Type: AWS::SNS::Topic
-    Properties:
-      TopicName: ECS-Workshop-Alerts
-      Subscription:
-        - Endpoint: !Ref Email
-          Protocol: email
   CFNRole:
     Type: AWS::IAM::Role
     Properties:
