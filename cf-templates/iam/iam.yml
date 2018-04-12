@@ -7,9 +7,31 @@ Parameters:
     Type: String
     Description: The StackPrefix for all LZ stacks
     Default: ecs-workshop
-    MaxLength: 29
+    MaxLength: 16
+    AllowedPattern: '[a-z0-9\-]+'
 
 Resources:
+  ECSInstanceIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /
+      AssumeRolePolicyDocument:
+        Statement:
+          -
+            Effect: Allow
+            Action: sts:AssumeRole
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role
+  ECSInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: '/'
+      Roles:
+      - Ref: ECSInstanceIAMRole
+      InstanceProfileName: !Sub "${StackPrefix}-EcsInstanceProfile"
   EcsServiceRole:
     Type: AWS::IAM::Role
     Properties:
