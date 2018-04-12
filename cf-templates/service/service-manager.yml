@@ -12,15 +12,6 @@ Parameters:
     Type: String
     Description: Prefix used for naming the resources created. ${StackPrefix}-<resource>.
     MaxLength: 29
-  ServiceTemplateBucketName:
-    Type: String
-    Description: Name for bucket we will use for our library
-  ServiceArtifactBucketName:
-    Type: String
-    Description: Name for bucket services will use for storing artifacts
-  ServiceResourceBucketName:
-    Type: String
-    Description: Name for bucket services will use for reading and writing
   ServiceBucketPath:
     Type: String
     Description: Path along the bucket where we'll put the templates
@@ -30,8 +21,13 @@ Parameters:
   PipelineIamRoleArn:
     Type: String
     Description: Arn of role to use for managing this pipeline
-  GitHubUser:
-    Description: 'User for GitHub'
+  StackPrefix:
+    Description: Stack Prefix
+    Type: String
+    MaxLength: 16
+    AllowedPattern: '[a-z0-9\-]+'
+  GitUser:
+    Description: 'User for Git'
     Type: String
   GitRepo:
     Description: 'Git repo name'
@@ -39,25 +35,21 @@ Parameters:
   GitBranch:
     Description: 'Branch being deployed'
     Type: 'String'
-  GitHubToken:
-    Description: 'OAuth Token for repo access'
-    Type: 'String'
-    Default: ""
-    NoEcho: true
+
 
 Resources:
   ServiceTemplateBucket:
     Type: "AWS::S3::Bucket"
     Properties:
-      BucketName: !Ref ServiceTemplateBucketName
+      BucketName: !Sub "${StackPrefix}-template-bucket"
   ServiceArtifactBucket:
     Type: "AWS::S3::Bucket"
     Properties:
-      BucketName: !Ref ServiceArtifactBucketName
+      BucketName: !Sub "${StackPrefix}-artifact-bucket"
   ServiceResourceBucket:
     Type: "AWS::S3::Bucket"
     Properties:
-      BucketName: !Ref ServiceResourceBucketName
+      BucketName: !Sub "${StackPrefix}-resource-bucket"
   BuildIamRole:
     Type: AWS::IAM::Role
     Properties:
@@ -88,16 +80,16 @@ Resources:
                   - s3:PutObject
                   - s3:PutObjectAcl
                 Resource:
-                  - !Sub arn:aws:s3:::${ServiceTemplateBucketName}/${ServiceBucketPath}/${GitRepo}
-                  - !Sub 'arn:aws:s3:::${ServiceTemplateBucketName}/${ServiceBucketPath}/${GitRepo}/*'
+                  - !Sub arn:aws:s3:::${ServiceTemplateBucket}/${ServiceBucketPath}/${GitRepo}
+                  - !Sub 'arn:aws:s3:::${ServiceTemplateBucket}/${ServiceBucketPath}/${GitRepo}/*'
               -
                 Sid: ListBucket
                 Effect: Allow
                 Action:
                   - s3:ListBucket
                 Resource:
-                  - !Sub arn:aws:s3:::${ServiceTemplateBucketName}
-                  - !Sub 'arn:aws:s3:::${ServiceTemplateBucketName}/*'
+                  - !Sub arn:aws:s3:::${ServiceTemplateBucket}
+                  - !Sub 'arn:aws:s3:::${ServiceTemplateBucket}/*'
         -
           PolicyName: CodeBuildStandardPolicy
           PolicyDocument:
@@ -118,7 +110,7 @@ Resources:
                 Action:
                   - s3:GetObject
                 Resource:
-                  - !Sub 'arn:aws:s3:::${ArtifactBucketName}/*' # TODO: narrow down
+                  - !Sub 'arn:aws:s3:::${ArtifactBucketName}/*'
       ManagedPolicyArns:
            - arn:aws:iam::aws:policy/AWSServiceCatalogAdminFullAccess
            - arn:aws:iam::aws:policy/AmazonS3FullAccess
@@ -175,36 +167,33 @@ Resources:
         Type: 'S3'
       RoleArn: !Ref PipelineIamRoleArn
       Stages:
-        -
-          Name: Source
+        - Name: FetchFromGit
           Actions:
-            -
-              Name: AppRepoSource
+            - Name: TemplateSource
               ActionTypeId:
                 Category: Source
-                Owner: ThirdParty
-                Provider: GitHub
-                Version: 1
+                Owner: AWS
+                Provider: S3
+                Version: '1'
               Configuration:
-                Owner: !Ref GitHubUser
-                Repo: !Ref GitRepo
-                Branch: !Ref GitBranch
-                OAuthToken: !Ref GitHubToken
+                S3Bucket: !Ref ArtifactBucketName
+                S3ObjectKey: !Sub ${GitUser}/${GitRepo}/branch/${GitBranch}/${GitUser}_${GitRepo}_branch_${GitBranch}.zip
+                PollForSourceChanges: true
               OutputArtifacts:
-                - Name: GitHubArtifact
+                - Name: S3Artifact
               RunOrder: '1'
         - Name: Deploy2S3
         # Use CodeBuild to deploy the templates to S3
           Actions:
-            - Name: CodeBuild
+            - Name: CreateUpdateSCProducts
               ActionTypeId:
                 Category: Build
                 Owner: AWS
                 Version: 1
                 Provider: CodeBuild
               Configuration:
-                ProjectName: !Sub ${StackPrefix}-create-portfolio-and-service-products
-              InputArtifacts: [Name: 'GitHubArtifact']
+                ProjectName: !Ref BuildProject
+              InputArtifacts: [Name: 'S3Artifact']
               OutputArtifacts: [Name: 'BuildOutput']
               RunOrder: 20
 Outputs:

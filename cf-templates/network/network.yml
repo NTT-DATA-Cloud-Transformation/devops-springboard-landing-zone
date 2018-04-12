@@ -8,7 +8,8 @@ Parameters:
   StackPrefix:
     Type: String
     Description: Prefix used for naming the resources created. ${StackPrefix}-<resource>.
-    MaxLength: 29
+    MaxLength: 16
+    AllowedPattern: '[a-z0-9\-]+'
   CIDR:
     Description: VPC CIDR
     Type: String
