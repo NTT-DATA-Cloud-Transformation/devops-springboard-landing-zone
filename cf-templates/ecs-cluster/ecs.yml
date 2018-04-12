@@ -332,10 +332,6 @@ Outputs:
     Value: !Ref DefaultTargetGroup
     Export:
       Name: !Sub ${StackPrefix}-default-tg
-  EcsInstanceLc:
-    Value: !Ref EcsInstanceLc
-    Export:
-      Name: !Sub ${StackPrefix}-instance-lc
   LoadBalancerListener:
     Value:  !Ref LoadBalancerListener
     Export:
