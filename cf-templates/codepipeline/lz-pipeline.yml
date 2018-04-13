@@ -40,12 +40,6 @@ Parameters:
   GitBranch:
     Description: 'Bit Branch being deployed'
     Type: 'String'
-  Email:
-    Description: Email for manual approval of ChangeSet
-    Type: String
-  ChangeSetName:
-    Description: Name for the Changeset
-    Type: String
 
 Resources:
   CFNRole:
@@ -151,7 +145,7 @@ Resources:
                 ActionMode: CHANGE_SET_REPLACE
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: !Sub ${StackPrefix}-iam
-                ChangeSetName: !Sub ${ChangeSetName}-iam
+                ChangeSetName: !Sub ${StackPrefix}-iam-changeset
                 TemplateConfiguration:  "S3Artifact::cf-templates/iam/config_params.json"
                 TemplatePath: "S3Artifact::cf-templates/iam/iam.yml"
                 ParameterOverrides:
@@ -169,7 +163,7 @@ Resources:
               Configuration:
                 Capabilities: CAPABILITY_NAMED_IAM
                 ActionMode: CHANGE_SET_EXECUTE
-                ChangeSetName: !Sub ${ChangeSetName}-iam
+                ChangeSetName: !Sub ${StackPrefix}-iam-changeset
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: !Sub ${StackPrefix}-iam
               RunOrder: '3'
@@ -187,8 +181,8 @@ Resources:
                 Capabilities: CAPABILITY_NAMED_IAM
                 ActionMode: CHANGE_SET_REPLACE
                 RoleArn: !GetAtt CFNRole.Arn
-                StackName: !Sub ${StackPrefix}-lz
-                ChangeSetName: !Sub ${ChangeSetName}-lz
+                StackName: !Sub ${StackPrefix}-network
+                ChangeSetName: !Sub ${StackPrefix}-network-changeset
                 TemplateConfiguration:  "S3Artifact::cf-templates/network/config_params.json"
                 TemplatePath: "S3Artifact::cf-templates/network/network.yml"
                 ParameterOverrides:
@@ -206,7 +200,7 @@ Resources:
               Configuration:
                 Capabilities: CAPABILITY_NAMED_IAM
                 ActionMode: CHANGE_SET_EXECUTE
-                ChangeSetName: !Sub ${ChangeSetName}-lz
+                ChangeSetName: !Sub ${StackPrefix}-network-changeset
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: !Sub ${StackPrefix}-lz
               RunOrder: '3'
@@ -225,7 +219,7 @@ Resources:
                 ActionMode: CHANGE_SET_REPLACE
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: !Sub ${StackPrefix}-cluster
-                ChangeSetName: !Sub ${ChangeSetName}-cluster
+                ChangeSetName: !Sub ${StackPrefix}-cluster-changeset
                 TemplateConfiguration:  "S3Artifact::cf-templates/ecs-cluster/config_params.json"
                 TemplatePath: "S3Artifact::cf-templates/ecs-cluster/ecs.yml"
                 ParameterOverrides:
@@ -243,7 +237,7 @@ Resources:
               Configuration:
                 Capabilities: CAPABILITY_NAMED_IAM
                 ActionMode: CHANGE_SET_EXECUTE
-                ChangeSetName: !Sub ${ChangeSetName}-cluster
+                ChangeSetName: !Sub ${StackPrefix}-cluster-changeset
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: !Sub ${StackPrefix}-cluster
               RunOrder: '3'

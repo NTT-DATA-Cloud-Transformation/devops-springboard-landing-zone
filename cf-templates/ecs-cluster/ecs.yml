@@ -348,3 +348,7 @@ Outputs:
     Value: !Ref ALBSecurityGroup
     Export:
       Name: !Sub ${StackPrefix}-alb-security-group
+  LaunchType:
+    Value: !Ref LaunchType
+    Export:
+      Name: !Sub ${StackPrefix}-launch-type
