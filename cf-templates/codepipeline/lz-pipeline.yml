@@ -196,7 +196,7 @@ Resources:
                 ActionMode: CHANGE_SET_EXECUTE
                 ChangeSetName: !Sub ${StackPrefix}-network-changeset
                 RoleArn: !GetAtt CFNRole.Arn
-                StackName: !Sub ${StackPrefix}-lz
+                StackName: !Sub ${StackPrefix}-network
               RunOrder: '3'
         - Name: ECSDeployStack
           Actions:
