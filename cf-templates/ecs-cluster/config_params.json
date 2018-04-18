@@ -1,6 +1,7 @@
 {
   "Parameters": {
     "EcsInstanceType": "t2.micro",
+    "LaunchType": "Fargate",
     "AsgMaxSize": "2",
     "AsgMinSize": "2",
     "EcsPort": "80",

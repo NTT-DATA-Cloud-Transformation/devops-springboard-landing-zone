@@ -7,6 +7,12 @@ Description: 'CloudFormation template for deploying ECS cluster'
 # 3. Launch seed service
 
 Parameters:
+  LaunchType:
+    Type: String
+    Default: Fargate
+    AllowedValues:
+      - Fargate
+      - EC2
   KeyName:
     Type: String
     Description: Optional - Name of an existing EC2 KeyPair to enable SSH access to
@@ -60,8 +66,11 @@ Conditions:
       - Ref: KeyName
       - ''
 
+  EC2: !Equals [ !Ref LaunchType, "EC2" ]
+
 Resources:
   LambdaExecRole:
+    Condition: EC2
     Type: 'AWS::IAM::Role'
     Properties:
       Path: /Common/Lambda/
@@ -94,6 +103,7 @@ Resources:
                 - lambda.amazonaws.com
   GetLatestAMILambda:
     Type: 'AWS::Lambda::Function'
+    Condition: EC2
     Properties:
       Description: Custom resource to get latest Amazon Linux/ECS optionmized AMI. block
       FunctionName: get-latest-amazon-ami
@@ -186,6 +196,7 @@ Resources:
               print(latest_image['ImageId'])
               return latest_image
   ECSOptimizedAMI:
+    Condition: EC2
     Type: 'Custom::GetLatestAMI'
     Properties:
       ServiceToken:
@@ -229,6 +240,7 @@ Resources:
         Fn::ImportValue: !Sub ${StackPrefix}-VpcId
       GroupDescription: Service ALB SG
   EcsInstanceAsg:
+    Condition: EC2
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       VPCZoneIdentifier:
@@ -280,6 +292,7 @@ Resources:
         TargetGroupArn: !Ref DefaultTargetGroup
 
   EcsInstanceLc:
+    Condition: EC2
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
       ImageId:
@@ -319,10 +332,6 @@ Outputs:
     Value: !Ref DefaultTargetGroup
     Export:
       Name: !Sub ${StackPrefix}-default-tg
-  EcsInstanceLc:
-    Value: !Ref EcsInstanceLc
-    Export:
-      Name: !Sub ${StackPrefix}-instance-lc
   LoadBalancerListener:
     Value:  !Ref LoadBalancerListener
     Export:
@@ -339,3 +348,7 @@ Outputs:
     Value: !Ref ALBSecurityGroup
     Export:
       Name: !Sub ${StackPrefix}-alb-security-group
+  LaunchType:
+    Value: !Ref LaunchType
+    Export:
+      Name: !Sub ${StackPrefix}-launch-type

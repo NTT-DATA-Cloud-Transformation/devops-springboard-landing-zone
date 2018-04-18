@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
-Description: Template for deploying stack
+Description: The stack creates all the required IAM roles for Landing Zone
 
 Parameters:
   StackPrefix:
@@ -84,3 +84,12 @@ Outputs:
     Value: !GetAtt CloudFormationRole.Arn
     Export:
       Name: !Sub ${StackPrefix}-cloudformation-role-arn
+  EC2InstanceRole:
+    Value: !Ref ECSInstanceIAMRole
+    Export:
+      Name: !Sub ${StackPrefix}-ecs-instance-role
+  EC2InstanceRoleArn:
+    Value: !GetAtt ECSInstanceIAMRole.Arn
+    Export:
+      Name: !Sub ${StackPrefix}-ecs-instance-role-arn
+
