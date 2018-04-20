@@ -5,9 +5,6 @@ Metadata:
   # Others
 
 Parameters:
-  SupportEmail:
-    Type: String
-    Description: Email used for the support purpose in service catalog products.
   StackPrefix:
     Type: String
     Description: Prefix used for naming the resources created. ${StackPrefix}-<resource>.
@@ -130,32 +127,23 @@ Resources:
             pre_build:
               commands:
                 - echo Starting product creation process
+                - pip install boto3 pyyaml
             build:
               commands:
-                - pip install boto3
-                - python scripts/service-catalog.py  --log_level $LOG_LEVEL --support_email  $SUPPORT_EMAIL  --bucket_name $BUCKET_NAME  --bucket_path $BUCKET_PATH  --portfolio_name $PORTFOLIO_NAME --support_url $SUPPORT_URL
+                - python scripts/service-catalog.py --log_level WARN --bucket_name $BUCKET_NAME --bucket_path $BUCKET_PATH --conf service-catalog-conf.yml
             post_build:
               commands:
-                 - echo Finished product creation  process
+                 - echo Finished product creation process
       Environment:
         ComputeType: "BUILD_GENERAL1_SMALL"
         Image: "aws/codebuild/docker:17.09.0"
         Type: "LINUX_CONTAINER"
         EnvironmentVariables:
-          - Name: AWS_DEFAULT_REGION
-            Value: !Ref AWS::Region
           - Name: BUCKET_NAME
             Value: !Sub ${ServiceTemplateBucket}
           - Name: BUCKET_PATH
             Value: !Sub ${ServiceBucketPath}/${GitRepo}
-          - Name: SUPPORT_EMAIL
-            Value: !Ref SupportEmail
-          - Name: PORTFOLIO_NAME
-            Value: !Sub ${GitRepo}
-          - Name: SUPPORT_URL
-            Value: "https://www.flux7.com"
-          - Name: LOG_LEVEL
-            Value: "WARN"
+
 
 
   ServiceManagerPipeline:
