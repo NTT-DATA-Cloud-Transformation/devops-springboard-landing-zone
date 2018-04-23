@@ -1,0 +1,232 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Create an RDS instance to store Anchore DB data for docker image audits and static analysis.
+Parameters:
+  StackPrefix:
+    Type: String
+    Description: String to append before exported outputs
+    Default: 'ecs-workshop'
+  DBInstanceType:
+    Type: String
+    Description: RDS instance type
+    Default: db.t2.medium
+    ConstraintDescription: must be a valid RDS instance type
+  DBName:
+    Type: String
+    Description: "Name of the database"
+    Default: anchoredb
+  DBUserName:
+    Type: String
+    Description: DB USername
+  PasswordParameterStoreName:
+    Type: String
+    Description: DB Password
+    Default: '/ECSWorkshop/AnchoreDB/DBPassword'
+  DBAllocatedStorage:
+    Default: '5'
+    Description: The size of the database (Gb)
+    Type: Number
+    MinValue: '5'
+    MaxValue: '6144'
+    ConstraintDescription: must be between 5+
+
+Resources:
+  PasswordManagerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: '/'
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+      Policies:
+      - PolicyName: Logging
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+            - Action:
+                - 'logs:CreateLogGroup*'
+                - 'logs:CreateLogStream'
+                - 'logs:PutLogEvents'
+              Resource: 'arn:aws:logs:*:*:*'
+              Effect: Allow
+      - PolicyName: SSMParameterStoreAccess
+        PolicyDocument:
+          Version: 2012-10-17
+          Statement:
+          -
+              Effect: Allow
+              Action:
+                - ssm:PutParameter
+                - ssm:GetParameters
+                - ssm:GetParameter
+              Resource:
+                - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter${PasswordParameterStoreName}'
+
+  PasswordManagerLambda:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Description: Custom resource to get latest Amazon Linux/ECS optionmized AMI. block
+      FunctionName: !Sub ${StackPrefix}-PasswordManager
+      MemorySize: 512
+      Handler: index.handler
+      Role: !GetAtt PasswordManagerRole.Arn
+      Timeout: 50
+      Runtime: python3.6
+      Code:
+        ZipFile:
+          'Fn::Sub': |
+            import boto3
+            import string
+            import random
+            from botocore.vendored import requests
+            import json
+            import os
+
+            SUCCESS = "SUCCESS"
+            FAILED = "FAILED"
+
+            def handler(event, context):
+              if event['RequestType'] == 'Delete':
+                send(event, context, SUCCESS, responseData={"Result":"Delete"})
+                return
+              try:
+                ssm_client = boto3.client('ssm')
+                parameter_name = os.environ['ParameterName']
+                stack_name = os.environ['StackName']
+                if event['ResourceProperties']['GeneratePassword'] == 'true':
+                  length = 12
+                  password = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(length))
+                  response = ssm_client.put_parameter(Name=parameter_name,Description = "Password for DB",Value=password, Type='SecureString',Overwrite=True)
+                response = ssm_client.get_parameter(Name=parameter_name, WithDecryption=True)
+                password = response['Parameter']['Value']
+                send(event, context, SUCCESS, {'Password': password},stack_name + '-PasswordManager', NoEcho=True )
+              except Exception as e:
+                print("something went wrong \n: {0}".format(str(e)))
+                send(event, context, FAILED)
+
+            def send(event, context, responseStatus, responseData, physicalResourceId=None, NoEcho=False):
+              responseUrl = event['ResponseURL']
+
+              print(responseUrl)
+
+              responseBody = {}
+              responseBody['Status'] = responseStatus
+              responseBody['Reason'] = 'See the details in CloudWatch Log Stream: ' + context.log_stream_name
+              responseBody['PhysicalResourceId'] = physicalResourceId or context.log_stream_name
+              responseBody['StackId'] = event['StackId']
+              responseBody['RequestId'] = event['RequestId']
+              responseBody['LogicalResourceId'] = event['LogicalResourceId']
+              responseBody['NoEcho'] = NoEcho
+              responseBody['Data'] = responseData
+              json_responseBody = json.dumps(responseBody)
+              headers = {
+                  'content-type' : '',
+                  'content-length' : str(len(json_responseBody))
+              }
+              try:
+                response = requests.put(responseUrl,
+                                        data=json_responseBody,
+                                        headers=headers)
+                print("Status code: " + response.reason)
+              except Exception as e:
+                  print("send(..) failed executing requests.put(..): " + str(e))
+      Environment:
+        Variables:
+          ParameterName: !Ref PasswordParameterStoreName
+          StackName: !Ref AWS::StackName
+
+  GeneratePassword:
+    Type: Custom::PasswordManager
+    Properties:
+      ServiceToken: !GetAtt PasswordManagerLambda.Arn
+      GeneratePassword: 'true'
+
+  DBEC2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "DB Security Group"
+      VpcId:
+        Fn::ImportValue: !Sub ${StackPrefix}-VpcId
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 5432
+        ToPort: 5432
+        CidrIp:
+          Fn::ImportValue: !Sub ${StackPrefix}-VpcCIDR
+      Tags:
+        - Key: Name
+          Value:
+            !Sub '${StackPrefix}-DBSecurity Group'
+
+  DBParamGroup:
+    Type: AWS::RDS::DBParameterGroup
+    Properties:
+      Description: Database Parameter Group + pg_stat_statements
+      Family: postgres9.6
+      Parameters:
+        shared_preload_libraries: pg_stat_statements
+
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: DB Private Subnet
+      SubnetIds:
+      - Fn::ImportValue: !Sub ${StackPrefix}-Private-Subnet-0
+      - Fn::ImportValue: !Sub ${StackPrefix}-Private-Subnet-1
+
+  DBServer:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBName: !Ref DBName
+      AllocatedStorage: !Ref DBAllocatedStorage
+      DBInstanceClass: !Ref DBInstanceType
+      Engine: postgres
+      MasterUsername:
+        Ref: DBUserName
+      MasterUserPassword: !GetAtt GeneratePassword.Password
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      DBParameterGroupName: !Ref DBParamGroup
+      VPCSecurityGroups:
+      - !GetAtt DBEC2SecurityGroup.GroupId
+      Tags:
+        - Key: Name
+          Value:
+            !Sub '${StackPrefix}-DBServer'
+
+Outputs:
+  DBEndpointAddress:
+    Description: DB Endpoint Address
+    Value: !GetAtt DBServer.Endpoint.Address
+    Export:
+      Name: !Sub ${StackPrefix}-DB-Endpoint
+  DBName:
+    Description: Database Name
+    Value: !Ref DBName
+    Export:
+      Name: !Sub ${StackPrefix}-DB-Name
+  DBEndpointPort:
+    Description: Database Port
+    Value: !GetAtt DBServer.Endpoint.Port
+    Export:
+      Name: !Sub ${StackPrefix}-DB-Port
+  DBUsername:
+    Description: Database User Name
+    Value: !Ref DBUserName
+    Export:
+      Name: !Sub ${StackPrefix}-DB-Username
+  PasswordManagerLambdaArn:
+    Description: ARN of the lambda function to retireve lambda password
+    Value: !GetAtt PasswordManagerLambda.Arn
+    Export:
+      Name: !Sub ${StackPrefix}-PasswordManager-Lambda
+  PasswordParameterStoreName:
+    Description: Parameter store name to retrieve password
+    Value: !Ref PasswordParameterStoreName
+    Export:
+      Name: !Sub ${StackPrefix}-PasswordParameterStoreName
+
+
