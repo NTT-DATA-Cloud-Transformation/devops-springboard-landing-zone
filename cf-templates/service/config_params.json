@@ -3,7 +3,6 @@
     "GitRepo":"ecs-workshop-service",
     "GitBranch":"master",
     "GitUser":"Flux7Labs",
-    "ServiceBucketPath":"admin",
-    "SupportEmail": "support@flux7.com"
+    "ServiceBucketPath":"service_catalog"
   }
 }
