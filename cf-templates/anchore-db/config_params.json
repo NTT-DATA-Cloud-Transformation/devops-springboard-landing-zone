@@ -1,0 +1,10 @@
+{
+  "Parameters": {
+    "DBName": "anchoredb",
+    "StackPrefix": "ecs-workshop",
+    "DBUserName": "anchore_engine",
+    "PasswordParameterStoreName": "/ECSWorkshop/AnchoreDB/DBPassword",
+    "DBAllocatedStorage": 5
+  }
+}
+
