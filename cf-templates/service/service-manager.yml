@@ -134,6 +134,7 @@ Resources:
             post_build:
               commands:
                  - echo Finished product creation process
+                 - aws s3 sync cf-templates/  s3://$BUCKET_NAME/cf-templates/
       Environment:
         ComputeType: "BUILD_GENERAL1_SMALL"
         Image: "aws/codebuild/docker:17.09.0"
@@ -170,7 +171,7 @@ Resources:
               OutputArtifacts:
                 - Name: S3Artifact
               RunOrder: '1'
-        - Name: Deploy2S3
+        - Name: DeployToServiceCatalog
         # Use CodeBuild to deploy the templates to S3
           Actions:
             - Name: CreateUpdateSCProducts
