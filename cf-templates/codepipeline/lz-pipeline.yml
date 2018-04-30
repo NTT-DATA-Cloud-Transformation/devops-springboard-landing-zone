@@ -235,9 +235,46 @@ Resources:
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: !Sub ${StackPrefix}-cluster
               RunOrder: '3'
-        - Name: CreateServiceChangeSetExecution
+        - Name: AnchoreDBStack
           Actions:
-            - Name: ServiceCreateChangeSet
+            - Name: CreateChangeSetAnchoreDB
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: '1'
+              InputArtifacts:
+                - Name: S3Artifact
+              Configuration:
+                Capabilities: CAPABILITY_NAMED_IAM
+                ActionMode: CHANGE_SET_REPLACE
+                RoleArn: !GetAtt CFNRole.Arn
+                StackName: !Sub ${StackPrefix}-anchore-db
+                ChangeSetName: !Sub ${StackPrefix}-anchore-db-changeset
+                TemplateConfiguration:  "S3Artifact::cf-templates/anchore-db/config_params.json"
+                TemplatePath: "S3Artifact::cf-templates/anchore-db/anchore-db.yml"
+                ParameterOverrides:
+                    !Sub |
+                      {
+                        "StackPrefix": "${StackPrefix}"
+                      }
+              RunOrder: '1'
+            - Name: ExecuteChangeSetAnchoreDB
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: '1'
+              Configuration:
+                Capabilities: CAPABILITY_NAMED_IAM
+                ActionMode: CHANGE_SET_EXECUTE
+                ChangeSetName: !Sub ${StackPrefix}-anchore-db-changeset
+                RoleArn: !GetAtt CFNRole.Arn
+                StackName: !Sub ${StackPrefix}-anchore-db
+              RunOrder: '3'
+        - Name: ServiceManagerStack
+          Actions:
+            - Name: ServiceManagerCreateChangeSet
               ActionTypeId:
                 Category: Deploy
                 Owner: AWS
@@ -262,7 +299,7 @@ Resources:
                       "StackPrefix": "${StackPrefix}"
                     }
               RunOrder: '1'
-            - Name: ServiceExecuteChangeSet
+            - Name: ServiceManagerExecuteChangeSet
               ActionTypeId:
                 Category: Deploy
                 Owner: AWS
