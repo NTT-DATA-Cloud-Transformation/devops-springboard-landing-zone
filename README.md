@@ -11,7 +11,8 @@ The CodePipeline deploys following stacks:
 1. IAM
 2. Network
 3. ECS Cluster
-4. Service Manager Pipeline
+4. Anchore-DB
+5. Service Manager Pipeline
 
 
 
