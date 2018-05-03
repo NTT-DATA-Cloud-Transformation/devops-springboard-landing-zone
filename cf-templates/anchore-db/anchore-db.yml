@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: AWS Devops Springboard - RDS instance to store Anchore DB data for docker image audits and static analysis.
+Description: AWS DevOps Springboard - RDS instance to store Anchore DB data for docker image audits and static analysis.
 Parameters:
   StackPrefix:
     Type: String

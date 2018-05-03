@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
-Description: AWS Devops Springboard - IAM Stack for the Landing Zone
+Description: AWS DevOps Springboard - IAM Stack for the Landing Zone
 
 Parameters:
   StackPrefix:

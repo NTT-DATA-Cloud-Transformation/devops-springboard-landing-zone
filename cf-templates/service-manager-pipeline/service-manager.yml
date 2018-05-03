@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: AWS Devops Springboard - Service Manager pipeline
+Description: AWS DevOps Springboard - Service Manager pipeline
 Metadata:
   VersionDate: 2017-07-24
   # Others

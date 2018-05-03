@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: "AWS Devops Springboard - Landing Zone Pipeline"
+Description: "AWS DevOps Springboard - Landing Zone Pipeline"
 Metadata:
     Stack: 3
     VersionDate: 2017-07-26
