@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
-Description: The stack creates all the required IAM roles for Landing Zone
+Description: AWS Devops Springboard - IAM Stack for the Landing Zone
 
 Parameters:
   StackPrefix:
