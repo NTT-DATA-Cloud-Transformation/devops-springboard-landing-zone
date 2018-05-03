@@ -70,9 +70,11 @@ Resources:
                   - s3:ListBucket
                   - s3:PutObject
                   - s3:PutObjectAcl
+                  - s3:Get*
                 Resource:
                   - !Sub arn:aws:s3:::${ServiceTemplateBucket}/${ServiceBucketPath}/${GitRepo}
                   - !Sub 'arn:aws:s3:::${ServiceTemplateBucket}/${ServiceBucketPath}/${GitRepo}/*'
+
               -
                 Sid: ListBucket
                 Effect: Allow
