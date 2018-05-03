@@ -1,4 +1,5 @@
-Description: 'CodePipeline Stack to create Landing Zone infrastructure'
+AWSTemplateFormatVersion: 2010-09-09
+Description: "AWS Devops Springboard - Landing Zone Pipeline"
 Metadata:
     Stack: 3
     VersionDate: 2017-07-26
@@ -290,8 +291,8 @@ Resources:
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: !Sub ${StackPrefix}-service-manager
                 ChangeSetName: !Sub ${StackPrefix}-service-changeset
-                TemplateConfiguration:  "S3Artifact::cf-templates/service/config_params.json"
-                TemplatePath: "S3Artifact::cf-templates/service/service-manager.yml"
+                TemplateConfiguration:  "S3Artifact::cf-templates/service-manager-pipeline/config_params.json"
+                TemplatePath: "S3Artifact::cf-templates/service-manager-pipeline/service-manager.yml"
                 ParameterOverrides:
                   !Sub |
                     {
