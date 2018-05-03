@@ -1,6 +1,6 @@
 {
   "Parameters" : {
-    "GitRepo":"ecs-workshop-service",
+    "GitRepo":"devops-springboard-pipelines",
     "GitBranch":"master",
     "GitUser":"Flux7Labs",
     "ServiceBucketPath":"service_catalog"

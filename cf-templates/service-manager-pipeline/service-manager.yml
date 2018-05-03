@@ -37,16 +37,10 @@ Parameters:
 Resources:
   ServiceTemplateBucket:
     Type: "AWS::S3::Bucket"
-    Properties:
-      BucketName: !Sub "${StackPrefix}-template-bucket"
+
   ServiceArtifactBucket:
     Type: "AWS::S3::Bucket"
-    Properties:
-      BucketName: !Sub "${StackPrefix}-artifact-bucket"
-  ServiceResourceBucket:
-    Type: "AWS::S3::Bucket"
-    Properties:
-      BucketName: !Sub "${StackPrefix}-resource-bucket"
+
   BuildIamRole:
     Type: AWS::IAM::Role
     Properties:
@@ -194,7 +188,3 @@ Outputs:
     Value: !Ref ServiceArtifactBucket
     Export:
       Name: !Sub ${StackPrefix}-service-artifact-bucket
-  ServiceResourceBucket:
-    Value: !Ref ServiceResourceBucket
-    Export:
-      Name: !Sub ${StackPrefix}-service-resource-bucket

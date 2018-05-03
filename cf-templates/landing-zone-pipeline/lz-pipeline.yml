@@ -1,4 +1,4 @@
-Description: 'CodePipeline Stack for Cloudformation Stacks Continuous Delivery'
+Description: 'CodePipeline Stack to create Landing Zone infrastructure'
 Metadata:
     Stack: 3
     VersionDate: 2017-07-26
@@ -10,12 +10,14 @@ Metadata:
               default: "CodePipeline Configuration"
             Parameters:
               - TemplatesBucket
+              - StackPrefix
           - Label:
               default: "Repository Details"
             Parameters:
-              - GitHubRepoOwner
-              - RepositoryName
-              - BranchName
+              - GitUser
+              - GitRepo
+              - GitBranch
+
 Parameters:
   TemplatesBucket:
     Description: S3 bucket to which nested CF templates are synced
@@ -32,7 +34,7 @@ Parameters:
     Description: 'Git repository name'
     Type: 'String'
   GitBranch:
-    Description: 'Bit Branch being deployed'
+    Description: 'Git Branch being deployed'
     Type: 'String'
 
 Resources:
@@ -106,7 +108,7 @@ Resources:
         Type: S3
       DisableInboundStageTransitions: []
       RestartExecutionOnUpdate: true
-      Name: !Sub "${StackPrefix}-pipeline"
+      Name: !Sub "${StackPrefix}-lz-pipeline"
       RoleArn: !GetAtt PipelineRole.Arn
       Stages:
         - Name: FetchFromGit
