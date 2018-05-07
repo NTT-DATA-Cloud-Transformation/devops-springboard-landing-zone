@@ -258,7 +258,7 @@ Resources:
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: !Sub ${StackPrefix}-network
               RunOrder: '3'
-        - Name: ECSDeployStack
+        - Name: ECSStackDeploy
           Actions:
             - Name: CreateChangeSetECSCluster
               ActionTypeId:
@@ -295,7 +295,7 @@ Resources:
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: !Sub ${StackPrefix}-cluster
               RunOrder: '3'
-        - Name: AnchoreDBStack
+        - Name: AnchoreDBStackDeploy
           Actions:
             - Name: CreateChangeSetAnchoreDB
               ActionTypeId:
@@ -332,7 +332,7 @@ Resources:
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: !Sub ${StackPrefix}-anchore-db
               RunOrder: '3'
-        - Name: ServiceManagerStack
+        - Name: ServiceManagerStackDeploy
           Actions:
             - Name: ServiceManagerCreateChangeSet
               ActionTypeId:
