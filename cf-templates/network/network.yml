@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: AWS ECS Workshop - Network Stack
+Description: AWS DevOps Springboard - Network Stack
 Metadata:
   VersionDate: 2017-07-24
   # Others

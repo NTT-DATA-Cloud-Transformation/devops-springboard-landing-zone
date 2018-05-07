@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'AWS Devops Springboard - ECS Cluster stack for the Landing Zone'
+Description: 'AWS DevOps Springboard - ECS Cluster stack for the Landing Zone'
 # TODO:
 # 1. Create ECS cluster
 # 2. Create ALB
