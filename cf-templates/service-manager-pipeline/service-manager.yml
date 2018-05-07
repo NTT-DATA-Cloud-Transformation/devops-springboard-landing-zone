@@ -35,10 +35,13 @@ Parameters:
 
 
 Resources:
-  ServiceTemplateBucket:
+  TemplateBucket:
     Type: "AWS::S3::Bucket"
 
-  ServiceArtifactBucket:
+  ArtifactBucket:
+    Type: "AWS::S3::Bucket"
+
+  ResourceBucket:
     Type: "AWS::S3::Bucket"
 
   BuildIamRole:
@@ -72,8 +75,8 @@ Resources:
                   - s3:PutObjectAcl
                   - s3:Get*
                 Resource:
-                  - !Sub arn:aws:s3:::${ServiceTemplateBucket}/${ServiceBucketPath}/${GitRepo}
-                  - !Sub 'arn:aws:s3:::${ServiceTemplateBucket}/${ServiceBucketPath}/${GitRepo}/*'
+                  - !Sub arn:aws:s3:::${TemplateBucket}/${ServiceBucketPath}/${GitRepo}
+                  - !Sub 'arn:aws:s3:::${TemplateBucket}/${ServiceBucketPath}/${GitRepo}/*'
 
               -
                 Sid: ListBucket
@@ -81,8 +84,8 @@ Resources:
                 Action:
                   - s3:ListBucket
                 Resource:
-                  - !Sub arn:aws:s3:::${ServiceTemplateBucket}
-                  - !Sub 'arn:aws:s3:::${ServiceTemplateBucket}/*'
+                  - !Sub arn:aws:s3:::${TemplateBucket}
+                  - !Sub 'arn:aws:s3:::${TemplateBucket}/*'
         -
           PolicyName: CodeBuildStandardPolicy
           PolicyDocument:
@@ -137,7 +140,7 @@ Resources:
         Type: "LINUX_CONTAINER"
         EnvironmentVariables:
           - Name: BUCKET_NAME
-            Value: !Sub ${ServiceTemplateBucket}
+            Value: !Sub ${TemplateBucket}
           - Name: BUCKET_PATH
             Value: !Sub ${ServiceBucketPath}/${GitRepo}
 
@@ -182,11 +185,15 @@ Resources:
               OutputArtifacts: [Name: 'BuildOutput']
               RunOrder: 20
 Outputs:
-  ServiceTemplateBucket:
-    Value: !Ref ServiceTemplateBucket
+  TemplateBucket:
+    Value: !Ref TemplateBucket
     Export:
       Name: !Sub ${StackPrefix}-service-template-bucket
-  ServiceArtifactBucket:
-    Value: !Ref ServiceArtifactBucket
+  ArtifactBucket:
+    Value: !Ref ArtifactBucket
     Export:
       Name: !Sub ${StackPrefix}-service-artifact-bucket
+  ResourceBucket:
+    Value: !Ref ResourceBucket
+    Export:
+      Name: !Sub ${StackPrefix}-service-resource-bucket
