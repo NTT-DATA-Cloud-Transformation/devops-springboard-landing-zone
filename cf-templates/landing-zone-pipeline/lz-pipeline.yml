@@ -39,9 +39,10 @@ Parameters:
   GitBranch:
     Description: 'Git Branch being deployed'
     Type: 'String'
-  NotifyEmail:
-    Type: String
-    Description: Email for  Landing Zone  administrators
+  #Uncomment below lines to add notification to the pipeline
+  #NotifyEmail:
+  #  Type: String
+  #  Description: Email for  Landing Zone  administrators
 
 
 Resources:
@@ -106,56 +107,57 @@ Resources:
                 Effect: Allow
                 Resource: '*'
 
-  PipelineSNSTopic:
-    Type: AWS::SNS::Topic
-    Properties:
-      DisplayName: "Landing Zone Notifications"
-      Subscription:
-        - Endpoint: !Ref NotifyEmail
-          Protocol: email
+  #Uncomment below lines to add notification to the pipeline
+  #PipelineSNSTopic:
+  #  Type: AWS::SNS::Topic
+  #  Properties:
+  #    DisplayName: "Landing Zone Notifications"
+  #    Subscription:
+  #      - Endpoint: !Ref NotifyEmail
+  #        Protocol: email
 
-  PiplineCloudwatchRule:
-    Type: AWS::Events::Rule
-    Properties:
-      Description: "Cloudwatch events rule to detect pipeline failures"
-      State: "ENABLED"
-      EventPattern:
-        source:
-        - "aws.codepipeline"
-        detail-type:
-        - "CodePipeline Stage Execution State Change"
-        detail:
-          state:
-            - "STARTED"
-          pipeline:
-            - !Ref Pipeline
-          stage:
-            - IAMStackDeploy
+  #PiplineCloudwatchRule:
+  #  Type: AWS::Events::Rule
+  #  Properties:
+  #    Description: "Cloudwatch events rule to detect pipeline failures"
+  #    State: "ENABLED"
+  #    EventPattern:
+  #      source:
+  #      - "aws.codepipeline"
+  #      detail-type:
+  #      - "CodePipeline Stage Execution State Change"
+  #      detail:
+  #        state:
+  #          - "STARTED"
+  #        pipeline:
+  #          - !Ref Pipeline
+  #        stage:
+  #          - IAMStackDeploy
 
-      Targets:
-      - Arn: !Ref PipelineSNSTopic
-        Id: PipelineNoticationSNS
-        InputTransformer:
-          InputPathsMap:
-            pipeline: $.detail.pipeline
-          InputTemplate: !Sub '"The Pipeline <pipeline> has started to deploy IAM stack."'
-    DependsOn: PipelineSNSTopicPolicy
+  #    Targets:
+  #    - Arn: !Ref PipelineSNSTopic
+  #      Id: PipelineNoticationSNS
+  #      InputTransformer:
+  #        InputPathsMap:
+  #          pipeline: $.detail.pipeline
+  #        InputTemplate: !Sub '"The Pipeline <pipeline> has started to deploy IAM stack."'
+  #  DependsOn: PipelineSNSTopicPolicy
 
-  PipelineSNSTopicPolicy:
-    Type: AWS::SNS::TopicPolicy
-    Properties:
-      PolicyDocument:
-        Id: MyTopicPolicy
-        Version: '2012-10-17'
-        Statement:
-        - Sid: TrustCWEToPublishEventsToMyTopic
-          Effect: Allow
-          Principal:
-            Service: "events.amazonaws.com"
-          Action: sns:Publish
-          Resource: !Ref PipelineSNSTopic
-      Topics:
-      - !Ref PipelineSNSTopic
+  #PipelineSNSTopicPolicy:
+  #  Type: AWS::SNS::TopicPolicy
+  #  Properties:
+  #    PolicyDocument:
+  #      Id: MyTopicPolicy
+  #      Version: '2012-10-17'
+  #      Statement:
+  #      - Sid: TrustCWEToPublishEventsToMyTopic
+  #        Effect: Allow
+  #        Principal:
+  #          Service: "events.amazonaws.com"
+  #        Action: sns:Publish
+  #        Resource: !Ref PipelineSNSTopic
+  #    Topics:
+  #    - !Ref PipelineSNSTopic
 
   Pipeline:
     Type: AWS::CodePipeline::Pipeline
