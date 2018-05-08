@@ -106,6 +106,7 @@ Resources:
                 Effect: Allow
                 Resource: '*'
 
+
   PipelineSNSTopic:
     Type: AWS::SNS::Topic
     Properties:
@@ -123,14 +124,12 @@ Resources:
         source:
         - "aws.codepipeline"
         detail-type:
-        - "CodePipeline Stage Execution State Change"
+        - "CodePipeline Pipeline Execution State Change"
         detail:
           state:
-            - "STARTED"
+            - "FAILED"
           pipeline:
             - !Ref Pipeline
-          stage:
-            - IAMStackDeploy
 
       Targets:
       - Arn: !Ref PipelineSNSTopic
@@ -138,7 +137,7 @@ Resources:
         InputTransformer:
           InputPathsMap:
             pipeline: $.detail.pipeline
-          InputTemplate: !Sub '"The Pipeline <pipeline> has started to deploy IAM stack."'
+          InputTemplate: !Sub '"The Pipeline <pipeline> has failed."'
     DependsOn: PipelineSNSTopicPolicy
 
   PipelineSNSTopicPolicy:
