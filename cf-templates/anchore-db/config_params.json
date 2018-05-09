@@ -1,9 +1,9 @@
 {
   "Parameters": {
     "DBName": "anchoredb",
-    "StackPrefix": "ecs-workshop",
+    "StackPrefix": "devops-springboard",
     "DBUserName": "anchore_engine",
-    "PasswordParameterStoreName": "/ECSWorkshop/AnchoreDB/DBPassword",
+    "PasswordParameterStoreName": "/DevopsSpringboard/AnchoreDB/DBPassword",
     "DBAllocatedStorage": "5"
   }
 }
