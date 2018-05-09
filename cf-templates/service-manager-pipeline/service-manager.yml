@@ -19,11 +19,6 @@ Parameters:
   PipelineIamRoleArn:
     Type: String
     Description: Arn of role to use for managing this pipeline
-  StackPrefix:
-    Description: Stack Prefix
-    Type: String
-    MaxLength: 16
-    AllowedPattern: '[a-z0-9\-]+'
   GitUser:
     Description: 'User for Git'
     Type: String
