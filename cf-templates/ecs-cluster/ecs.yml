@@ -7,12 +7,6 @@ Description: 'AWS DevOps Springboard - ECS Cluster stack for the Landing Zone'
 # 3. Launch seed service
 
 Parameters:
-  LaunchType:
-    Type: String
-    Default: Fargate
-    AllowedValues:
-      - Fargate
-      - EC2
   KeyName:
     Type: String
     Description: Optional - Name of an existing EC2 KeyPair to enable SSH access to
@@ -56,8 +50,7 @@ Parameters:
   StackPrefix:
     Type: String
     Description: String to append before exported outputs
-    Default: 'ecs-workshop'
-    MaxLength: 16
+    MaxLength: 32
     AllowedPattern: '[a-z0-9\-]+'
 Conditions:
   CreateEC2LCWithKeyPair:
@@ -65,8 +58,9 @@ Conditions:
     - Fn::Equals:
       - Ref: KeyName
       - ''
-
-  EC2: !Equals [ !Ref LaunchType, "EC2" ]
+  #Use Ec2 for regions where fargate is not available
+  #TODO Refine this as and when fargate becomes available in more regions
+  EC2: !Not [!Equals [ !Ref "AWS::Region", "us-east-1" ]]
 
 Resources:
   LambdaExecRole:
@@ -348,7 +342,3 @@ Outputs:
     Value: !Ref ALBSecurityGroup
     Export:
       Name: !Sub ${StackPrefix}-alb-security-group
-  LaunchType:
-    Value: !Ref LaunchType
-    Export:
-      Name: !Sub ${StackPrefix}-launch-type

@@ -1,14 +1,13 @@
 {
   "Parameters": {
     "EcsInstanceType": "t2.micro",
-    "LaunchType": "Fargate",
     "AsgMaxSize": "2",
     "AsgMinSize": "2",
     "EcsPort": "80",
     "ElbPort": "80",
     "ElbHealthCheckTarget": "HTTP:80/",
     "SourceCidr": "0.0.0.0/0",
-    "EcsEndpoint": "ecs-workshop",
-    "KeyName": "ecs-workshop"
+    "EcsEndpoint": "devops-springboard",
+    "KeyName": "devops-springboard"
   }
 }
