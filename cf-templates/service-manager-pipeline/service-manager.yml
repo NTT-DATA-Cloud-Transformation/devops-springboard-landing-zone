@@ -8,7 +8,8 @@ Parameters:
   StackPrefix:
     Type: String
     Description: Prefix used for naming the resources created. ${StackPrefix}-<resource>.
-    MaxLength: 29
+    MaxLength: 32
+    AllowedPattern: '[a-z0-9\-]+'
   ServiceBucketPath:
     Type: String
     Description: Path along the bucket where we'll put the templates

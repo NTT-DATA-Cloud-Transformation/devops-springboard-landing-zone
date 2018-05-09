@@ -3,8 +3,9 @@ Description: AWS DevOps Springboard - RDS instance to store Anchore DB data for 
 Parameters:
   StackPrefix:
     Type: String
-    Description: String to append before exported outputs
-    Default: 'ecs-workshop'
+    Description: Prefix used for naming the resources created. ${StackPrefix}-<resource>.
+    MaxLength: 32
+    AllowedPattern: '[a-z0-9\-]+'
   DBInstanceType:
     Type: String
     Description: RDS instance type
