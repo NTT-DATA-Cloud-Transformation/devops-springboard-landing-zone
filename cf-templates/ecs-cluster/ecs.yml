@@ -60,7 +60,7 @@ Conditions:
       - ''
   #Use Ec2 for regions where fargate is not available
   #TODO Refine this as and when fargate becomes available in more regions
-  EC2: !Not [!Equals [ !Ref AWS::Region, "us-east-1" ]]
+  EC2: !Not [!Equals [ !Ref "AWS::Region", "us-east-1" ]]
 
 Resources:
   LambdaExecRole:
@@ -342,7 +342,3 @@ Outputs:
     Value: !Ref ALBSecurityGroup
     Export:
       Name: !Sub ${StackPrefix}-alb-security-group
-  LaunchType:
-    Value: !Ref LaunchType
-    Export:
-      Name: !Sub ${StackPrefix}-launch-type
