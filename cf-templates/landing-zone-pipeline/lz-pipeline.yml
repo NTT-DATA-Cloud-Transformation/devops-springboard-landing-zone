@@ -124,12 +124,19 @@ Resources:
         source:
         - "aws.codepipeline"
         detail-type:
-        - "CodePipeline Pipeline Execution State Change"
+        - "CodePipeline Stage Execution State Change"
         detail:
           state:
             - "FAILED"
           pipeline:
             - !Ref Pipeline
+          stage:
+            - FetchFromGit
+            - IAMStackDeploy
+            - NetworkStackDeploy
+            - ECSStackDeploy
+            - AnchoreDBStackDeploy
+            - ServiceManagerStackDeploy
 
       Targets:
       - Arn: !Ref PipelineSNSTopic
@@ -137,7 +144,8 @@ Resources:
         InputTransformer:
           InputPathsMap:
             pipeline: $.detail.pipeline
-          InputTemplate: !Sub '"The Pipeline <pipeline> has failed."'
+            stage: $.detail.stage
+          InputTemplate: !Sub '"The Stage <stage> in Pipeline <pipeline> has failed."'
     DependsOn: PipelineSNSTopicPolicy
 
   PipelineSNSTopicPolicy:
