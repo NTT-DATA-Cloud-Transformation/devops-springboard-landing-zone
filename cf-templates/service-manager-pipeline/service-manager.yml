@@ -249,6 +249,6 @@ Outputs:
     Export:
       Name: !Sub ${StackPrefix}-service-resource-bucket
   LambdaCleanInput:
-    Value: !Ref LambdaCleanInput
+    Value: !GetAtt LambdaCleanInput.Arn
     Export:
       Name: !Sub ${StackPrefix}-lambda-clean-input
