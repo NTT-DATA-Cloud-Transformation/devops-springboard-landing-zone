@@ -211,29 +211,29 @@ Resources:
                     response['Data'] = 'Error - See CloudWatch logs for details %s'%E"
                     cfnresponse.send(event, context, cfnresponse.FAILED, response)
 
-    LambdaExecutionRole:
-      Type: AWS::IAM::Role
-      Properties:
-          Path: '/'
-          Policies:
-            - PolicyName: "LambdaExecute"
-              PolicyDocument:
-                Version: '2012-10-17'
-                Statement:
-                - Resource: "arn:aws:logs:*:*:*"
-                  Action:
-                  - logs:CreateLogGroup*
-                  - logs:CreateLogStream
-                  - logs:PutLogEvents
-                  Effect: Allow
-          AssumeRolePolicyDocument:
-            Statement:
-            - Action:
-              - sts:AssumeRole
-              Effect: Allow
-              Principal:
-                Service:
-                 - lambda.amazonaws.com
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+        Path: '/'
+        Policies:
+          - PolicyName: "LambdaExecute"
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+              - Resource: "arn:aws:logs:*:*:*"
+                Action:
+                - logs:CreateLogGroup*
+                - logs:CreateLogStream
+                - logs:PutLogEvents
+                Effect: Allow
+        AssumeRolePolicyDocument:
+          Statement:
+          - Action:
+            - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+               - lambda.amazonaws.com
 
 Outputs:
   TemplateBucket:
