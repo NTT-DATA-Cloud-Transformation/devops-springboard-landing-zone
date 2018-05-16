@@ -168,13 +168,31 @@ Resources:
                 Sid: IAMPermissions
                 Effect: Allow
                 Action:
-                - iam:CreateRole
+                - iam:Create*
                 - iam:PutRolePolicy
                 - iam:PassRole
                 - iam:Get*
                 - iam:List*
+                - iam:DeleteRole
+                - iam:DeletePolicy
+                - iam:CreateRolePolicy
+                - iam:DeleteRolePolicy
+                - iam:AttachRolePolicy
+                - iam:DeletePolicyVersion
+                - iam:SetDefaultPolicyVersion
+                - iam:UpdateAssumeRolePolicy
+                - iam:DetachRolePolicy
+                - iam:DeletePolicyVersion
                 Resource: "*"
-
+              -
+                Sid: MiscPermissions
+                Effect: Allow
+                Action:
+                - cloudformation:*
+                - sns:*
+                - ecr:*
+                - events:*
+                Resource: "*"
 
 
   ServiceManagerPipeline:
