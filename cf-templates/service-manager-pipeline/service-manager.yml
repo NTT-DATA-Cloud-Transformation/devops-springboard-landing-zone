@@ -193,28 +193,30 @@ Resources:
         Timeout: 300
         Code:
             ZipFile: |
-              import re
-              import cfnresponse
-              import json
-              def lambda_handler(event, context):
-                print("Received event: " + json.dumps(event, indent=2))
-                response = {}
-                response['ResponseURL'] = event['ResponseURL']
-                response['StackId'] = event['StackId']
-                response['RequestId'] = event['RequestId']
-                response['LogicalResourceId'] = event['LogicalResourceId']
-                if event['RequestType'] == 'Delete':
-                  return cfnresponse.send(event, context, cfnresponse.SUCCESS)
-                try:
-                  keys = ['GitRepo','GitBranch','GitUser']
-                  for key in keys:
-                    input_string = event['ResourceProperties'][key]
-                    input_string = re.sub(r'[\.\/\%\$\^\*\@\!\_\-\(\)\:\;\'\"\{\}\[\]]','-',input_string)
-                    response['lambda'+key] = input_string.lower()
-                  cfnresponse.send(event, context, cfnresponse.SUCCESS, response)
-                except Exception as e:
-                  response['Data'] = 'Error - See CloudWatch logs for details %s'%e
-                  cfnresponse.send(event, context, cfnresponse.FAILED, response)
+                import re
+                import cfnresponse
+                import json
+                def lambda_handler(event, context):
+                    print("Received event: " + json.dumps(event, indent=2))
+                    response = {}
+                    response['ResponseURL'] = event['ResponseURL']
+                    response['StackId'] = event['StackId']
+                    response['RequestId'] = event['RequestId']
+                    response['LogicalResourceId'] = event['LogicalResourceId']
+                    if event['RequestType'] == 'Delete':
+                      cfnresponse.send(event, context, cfnresponse.SUCCESS, response)
+                      return
+                    try:
+                      keys = ['GitRepo','GitBranch','GitUser']
+                      for key in keys:
+                        input_string = event['ResourceProperties'][key]
+                        input_string = re.sub(r'[\.\/\%\$\^\*\@\!\_\-\(\)\:\;\'\"\{\}\[\]]','-',input_string)
+                        response['lambda'+key] = input_string.lower()
+                      cfnresponse.send(event, context, cfnresponse.SUCCESS, response)
+                    except Exception as e:
+                      response['Data'] = 'Error - See CloudWatch logs for details %s'%e
+                      cfnresponse.send(event, context, cfnresponse.FAILED, response)
+
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
