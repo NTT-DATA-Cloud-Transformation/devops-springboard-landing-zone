@@ -68,7 +68,6 @@ Conditions:
 
 Resources:
   LambdaExecRole:
-    Condition: EC2
     Type: 'AWS::IAM::Role'
     Properties:
       Path: /Common/Lambda/
@@ -136,13 +135,13 @@ Resources:
       Code:
         ZipFile: |
             import boto3
-            import pprint
             import os
             import botocore
             import datetime
             from boto3.dynamodb.conditions import Attr
             import time
             import cfnresponse
+            import json
 
             TIMEOUT_MS =30 * 1000
             dynamodb = boto3.resource('dynamodb')
@@ -240,7 +239,7 @@ Resources:
                 if event['RequestType'] == 'Delete':
                   cfnresponse.send(event, context, cfnresponse.SUCCESS, response)
                   return
-                elb_client = boto.client("elbv2", region_name=REGION)
+                elb_client = boto3.client("elbv2", region_name=REGION)
                 table = dynamodb.Table(DYNAMODB_TABLE)
                 caller = event['ResourceProperties']['StackName']
                 locked = False
@@ -248,7 +247,7 @@ Resources:
                     locked = aquire_lock(table, 30*1000, caller)
                     time.sleep(1)
                 slot = get_empty_slot(elb_client, LISTENER_ARN)
-                response['slot'] = slot
+                response['priority'] = slot
                 release_lock(table,caller)
                 cfnresponse.send(event, context, cfnresponse.SUCCESS, response)
         
