@@ -52,6 +52,10 @@ Parameters:
     Description: String to append before exported outputs
     MaxLength: 32
     AllowedPattern: '[a-z0-9\-]+'
+  ECSImageId:
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: "/aws/service/ecs/optimized-ami/amazon-linux/recommended/image_id"
+
 Conditions:
   CreateEC2LCWithKeyPair:
     Fn::Not:
@@ -79,12 +83,13 @@ Resources:
                   - 'logs:PutLogEvents'
                 Resource: 'arn:aws:logs:*:*:*'
                 Effect: Allow
-        - PolicyName: Ec2DescribeImages
+        - PolicyName: GetListenerPolicy
           PolicyDocument:
             Version: 2012-10-17
             Statement:
               - Action:
-                  - 'ec2:Describe*'
+                  - 'dynamodb:*'
+                  - 'elasticloadbalancing:Describe*'
                 Resource: '*'
                 Effect: Allow
       AssumeRolePolicyDocument:
@@ -95,108 +100,157 @@ Resources:
             Principal:
               Service:
                 - lambda.amazonaws.com
-  GetLatestAMILambda:
-    Type: 'AWS::Lambda::Function'
-    Condition: EC2
-    Properties:
-      Description: Custom resource to get latest Amazon Linux/ECS optionmized AMI. block
-      FunctionName: get-latest-amazon-ami
-      MemorySize: 512
-      Handler: index.handler
-      Role:
-        'Fn::GetAtt':
-          - LambdaExecRole
-          - Arn
-      Timeout: 50
-      Runtime: python3.6
-      Code:
-        ZipFile:
-          'Fn::Sub': |
-            import cfnresponse
-            import time
-            import boto3
-            import re
-            AMI_TYPE_MAPPING = {
-              'AMAZON_LINUX': {
-                  'owner': '137112412989',
-                  'ami_name_pattern': 'amzn-ami-hvm-.*-gp2'
-              },
-              'ECS_OPTIMIZED':{
-                  'owner': '591542846629',
-                  'ami_name_pattern': 'amzn-ami-.*-ecs-optimized'
-              }
-            }
-            def handler(event, context):
-              if event['RequestType'] == 'Delete':
-                cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData={"Result":"Delete"})
-                return
-              try:
-                ami_type = event['ResourceProperties']['AMIType']
-                ec2_client = boto3.client('ec2')
-                image = get_latest_AMI(ami_type,ec2_client)
-                responseData = {"ImageId": image['ImageId'], "Name":image['Name']}
-                cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData,image['ImageId'] )
-              except Exception as e:
-                print("something went wrong \n: {0}".format(str(e)))
-                cfnresponse.send(event, context, cfnresponse.FAILED)
 
-            def get_latest_AMI(ami_type, ec2_client):
-              response = ec2_client.describe_images(
-                  Filters = [
-                      {
-                          'Name': 'is-public',
-                          'Values': ['true']
-                      },
-                      {
-                          'Name': 'owner-alias',
-                          'Values': ['amazon']
-                      },
-                      {
-                          'Name': 'virtualization-type',
-                          'Values': ['hvm']
-                      },
-                      {
-                          'Name': 'image-type',
-                          'Values': ['machine']
-                      },
-                      {
-                          'Name': 'root-device-type',
-                          'Values': ['ebs']
-                      },
-                      {
-                          'Name': 'owner-id',
-                          'Values': [AMI_TYPE_MAPPING[ami_type]['owner']]
-                      },
-                      {
-                          'Name': 'block-device-mapping.volume-type',
-                          'Values': ['gp2']
-                      },
-                      {
-                          'Name': 'architecture',
-                          'Values': ['x86_64']
-                      }
-                  ],
-                  Owners=['amazon']
-              )
-              images = response['Images']
-              amazon_hvm = []
-              prog = re.compile(AMI_TYPE_MAPPING[ami_type]['ami_name_pattern'])
-              creation_time_pattern = '%Y-%m-%dT%H:%M:%S.000Z'
-              for image in images:
-                  if prog.match(image['Name']):
-                      if '.rc' not in image['Name']:
-                          amazon_hvm.append(image)
-              latest_image = max(amazon_hvm, key=lambda p: int(time.mktime(time.strptime(p['CreationDate'], creation_time_pattern))))
-              print(latest_image['ImageId'])
-              return latest_image
-  ECSOptimizedAMI:
-    Condition: EC2
-    Type: 'Custom::GetLatestAMI'
+  LockTable:
+    Type: AWS::DynamoDB::Table
     Properties:
-      ServiceToken:
-        !GetAtt GetLatestAMILambda.Arn
-      AMIType: ECS_OPTIMIZED
-      DummyProp: 0
+      TableName: !Sub "${StackPrefix}"
+      ProvisionedThroughput:
+        ReadCapacityUnits: "5"
+        WriteCapacityUnits: "5"
+      AttributeDefinitions:
+      -
+        AttributeName: "LockID"
+        AttributeType: "S"
+      KeySchema:
+      -
+        AttributeName: "LockID"
+        KeyType: "HASH"
+
+  LambdaListnerPriority:
+    Type: "AWS::Lambda::Function"
+    Properties:
+        Handler: index.lambda_handler
+        Role:
+          Fn::GetAtt:
+            - LambdaExecRole
+            - Arn
+        Runtime: python3.6
+        Timeout: 300
+        Code:
+            ZipFile: |
+              import boto3
+              import pprint
+              import os
+              import botocore
+              import datetime
+              from boto3.dynamodb.conditions import Attr
+              import time
+              import cfnresponse
+
+              TIMEOUT_MS =30 * 1000
+              dynamodb = boto3.resource('dynamodb')
+              NO_HOLDER = '__empty__'
+              LOCK_ID = os.environ['StackPrefix']
+              LISTENER_ARN = os.environ['ListnerArn']
+              DYNAMODB_TABLE = os.environ['DynamoDbTable']
+              REGION = os.environ['Region']
+
+              def timestamp_millis():
+                  return int((datetime.datetime.utcnow() -
+                              datetime.datetime(1970, 1, 1)).total_seconds() * 1000)
+
+
+              def get_empty_slot(elb_client, listener_arn):
+                  response = elb_client.describe_rules(
+                      ListenerArn=listener_arn
+                  )
+                  listener_priority_rules = [x['Priority'] for x in response['Rules']]
+                  slot = 0
+                  for i in range(1, 101):
+                      if str(i) not in listener_priority_rules:
+                          slot = i
+                          break
+                  return slot
+
+
+              def prune_expired_lock(table):
+                  now = timestamp_millis()
+                  try:
+                      table.put_item(
+                          Item={
+                              'LockId': LOCK_ID,
+                              'expire_ts': 0,
+                              'holder': NO_HOLDER
+                          },
+                          ConditionExpression=Attr("expire_ts").lt(now) | Attr('LockId').not_exists()
+                      )
+                  except botocore.exceptions.ClientError as e:
+                      if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
+                          print("Prune: LockId={0} Prune failed".format(LOCK_ID))
+                          return False
+                  print("Prune: LockId={0}, Prune succeeded".format(LOCK_ID))
+                  return True
+
+
+              def aquire_lock(table,  waitms, caller):
+                  while not prune_expired_lock(table):
+                      time.sleep(1)
+                  expire_ts = timestamp_millis() + waitms
+                  try:
+                      table.put_item(
+                          Item={
+                              'LockId': LOCK_ID,
+                              'expire_ts': expire_ts,
+                              'holder': caller
+                          },
+                          # TODO: adding Attr("holder").eq(caller) should make it re-entrant
+                          ConditionExpression=Attr("holder").eq(NO_HOLDER) | Attr('LockId').not_exists()
+                              )
+                  except botocore.exceptions.ClientError as e:
+                      if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
+                          print("Write_item: LockId={0}, caller {1}, lock is being held".format(LOCK_ID, caller))
+                          return False
+                  print("Write_item: LockId={0}, caller {1}, lock is acquired".format(LOCK_ID, caller))
+                  return True
+
+
+              def release_lock(table, caller):
+                  prune_expired_lock(table)
+                  now = timestamp_millis()
+                  try:
+                      table.put_item(
+                          Item={
+                              'LockId': LOCK_ID,
+                              'expire_ts': 0,
+                              'holder': NO_HOLDER
+                          },
+                          ConditionExpression=Attr("holder").eq(caller) | Attr('LockId').not_exists()
+                      )
+                  except botocore.exceptions.ClientError as e:
+                      if e.response['Error']['Code'] == 'ConditionalCheckFailedException':
+                          print("clear_lock_item: lockname={0}, {1} release failed".format(LOCK_ID,caller))
+                          return False
+                  print("clear_lock_item: lockname={0}, {1} release succeeded".format(LOCK_ID, caller))
+                  return True
+
+              def lambda_handler(event, context):
+                  print("Received event: " + json.dumps(event, indent=2))
+                  response = {}
+                  response['ResponseURL'] = event['ResponseURL']
+                  response['StackId'] = event['StackId']
+                  response['RequestId'] = event['RequestId']
+                  response['LogicalResourceId'] = event['LogicalResourceId']
+                  if event['RequestType'] == 'Delete':
+                    cfnresponse.send(event, context, cfnresponse.SUCCESS, response)
+                    return
+                  elb_client = boto.client("elbv2", region_name=REGION)
+                  table = dynamodb.Table(DYNAMODB_TABLE)
+                  caller = event['ResourceProperties']['StackName']
+                  locked = False
+                  while not locked:
+                      locked = aquire_lock(table, 30*1000, caller)
+                      time.sleep(1)
+                  slot = get_empty_slot(elb_client, LISTENER_ARN)
+                  response['slot'] = slot
+                  release_lock(table,caller)
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS, response)
+        Environment:
+          Variables:
+            StackPrefix: !Ref StackPrefix
+            ListnerArn: !Ref !Ref LoadBalancerListener
+            DynamoDbTable: !Ref StackPrefix
+            Region: !Sub ${AWS::Region}
 
   EcsSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -290,7 +344,7 @@ Resources:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
       ImageId:
-        Ref: ECSOptimizedAMI
+        Ref: ECSImageId
       InstanceType:
         Ref: EcsInstanceType
       AssociatePublicIpAddress: true
@@ -342,3 +396,7 @@ Outputs:
     Value: !Ref ALBSecurityGroup
     Export:
       Name: !Sub ${StackPrefix}-alb-security-group
+  LambdaListnerPriority:
+    Value: !GetAtt LambdaListnerPriority.Arn
+    Export:
+      Name: !Sub ${StackPrefix}-lambda-listener-priority
