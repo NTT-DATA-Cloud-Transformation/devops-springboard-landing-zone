@@ -139,7 +139,60 @@ Resources:
             Value: !Sub ${TemplateBucket}
           - Name: BUCKET_PATH
             Value: !Sub ${ServiceBucketPath}/${GitRepo}
+          - Name: LZ_STACK_PREFIX
+            Value: !Ref StackPrefix
+          - Name: LAUNCH_CONSTRAINT_ROLE_ARN
+            Value: !GetAtt ServiceCatalogLaunchRole.Arn
 
+  ServiceCatalogLaunchRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      Path: /
+      AssumeRolePolicyDocument:
+        Statement:
+          -
+            Effect: Allow
+            Action: sts:AssumeRole
+            Principal:
+              Service: 'servicecatalog.amazonaws.com'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSCodePipelineFullAccess
+        - arn:aws:iam::aws:policy/AWSCodeBuildAdminAccess
+      Policies:
+        -
+          PolicyName: IAMRelatedPolicy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              -
+                Sid: IAMPermissions
+                Effect: Allow
+                Action:
+                - iam:Create*
+                - iam:PutRolePolicy
+                - iam:PassRole
+                - iam:Get*
+                - iam:List*
+                - iam:DeleteRole
+                - iam:DeletePolicy
+                - iam:CreateRolePolicy
+                - iam:DeleteRolePolicy
+                - iam:AttachRolePolicy
+                - iam:DeletePolicyVersion
+                - iam:SetDefaultPolicyVersion
+                - iam:UpdateAssumeRolePolicy
+                - iam:DetachRolePolicy
+                - iam:DeletePolicyVersion
+                Resource: "*"
+              -
+                Sid: MiscPermissions
+                Effect: Allow
+                Action:
+                - cloudformation:*
+                - sns:*
+                - ecr:*
+                - events:*
+                Resource: "*"
 
 
   ServiceManagerPipeline:
