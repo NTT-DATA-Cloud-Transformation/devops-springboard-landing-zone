@@ -39,6 +39,10 @@ Parameters:
   GitBranch:
     Description: 'Git Branch being deployed'
     Type: 'String'
+  GitHubToken:
+    Description: 'OAuth Token for repo access'
+    Type: 'String'
+    NoEcho: true
   NotifyEmail:
     Type: String
     Description: Email for  Landing Zone  administrators
@@ -181,12 +185,16 @@ Resources:
             - Name: TemplateSource
               ActionTypeId:
                 Category: Source
-                Owner: AWS
-                Provider: S3
+                Owner: ThirdParty
+                Provider: GitHub
                 Version: '1'
               Configuration:
-                S3Bucket: !Ref TemplatesBucket
-                S3ObjectKey: !Sub ${GitUser}/${GitRepo}/branch/${GitBranch}/${GitUser}_${GitRepo}_branch_${GitBranch}.zip
+                Owner: !Ref GitUser
+                Repo: !Ref GitRepo
+                Branch: !Ref GitBranch
+                OAuthToken: !Ref GitHubToken
+                # S3Bucket: !Ref TemplatesBucket
+                # S3ObjectKey: !Sub ${GitUser}/${GitRepo}/branch/${GitBranch}/${GitUser}_${GitRepo}_branch_${GitBranch}.zip
                 PollForSourceChanges: true
               OutputArtifacts:
                 - Name: S3Artifact
@@ -302,8 +310,8 @@ Resources:
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: !Sub ${StackPrefix}-cluster
               RunOrder: '3'
-        - Name: AnchoreDBStackDeploy
-          Actions:
+        # - Name: AnchoreDBStackDeploy
+          # Actions:
             - Name: CreateChangeSetAnchoreDB
               ActionTypeId:
                 Category: Deploy

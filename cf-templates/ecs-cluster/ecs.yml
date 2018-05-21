@@ -188,7 +188,7 @@ Resources:
                 return True
 
 
-            def aquire_lock(table,  waitms, caller):
+            def aquire_lock(table,  waitms, caller ,slot):
                 while not prune_expired_lock(table):
                     time.sleep(1)
                 expire_ts = timestamp_millis() + waitms
@@ -197,7 +197,8 @@ Resources:
                         Item={
                             'LockId': LOCK_ID,
                             'expire_ts': expire_ts,
-                            'holder': caller
+                            'holder': caller,
+                            'slot': slot
                         },
                         # TODO: adding Attr("holder").eq(caller) should make it re-entrant
                         ConditionExpression=Attr("holder").eq(NO_HOLDER) | Attr('LockId').not_exists()
@@ -243,10 +244,11 @@ Resources:
                 table = dynamodb.Table(DYNAMODB_TABLE)
                 caller = event['ResourceProperties']['StackName']
                 locked = False
-                while not locked:
-                    locked = aquire_lock(table, 30*1000, caller)
-                    time.sleep(1)
                 slot = get_empty_slot(elb_client, LISTENER_ARN)
+                while not locked:
+                    locked = aquire_lock(table, 30*1000, caller, slot)
+                    time.sleep(1)
+                
                 response['priority'] = slot
                 release_lock(table,caller)
                 cfnresponse.send(event, context, cfnresponse.SUCCESS, response)
