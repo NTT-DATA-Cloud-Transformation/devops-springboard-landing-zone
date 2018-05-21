@@ -8,6 +8,7 @@
     "ElbHealthCheckTarget": "HTTP:80/",
     "SourceCidr": "0.0.0.0/0",
     "EcsEndpoint": "devops-springboard",
-    "KeyName": "devops-springboard"
+    "KeyName": "devops-springboard",
+    "ECSImageId": "/aws/service/ecs/optimized-ami/amazon-linux/recommended/image_id"
   }
 }
