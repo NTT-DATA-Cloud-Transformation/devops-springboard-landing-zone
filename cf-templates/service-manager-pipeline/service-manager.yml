@@ -165,7 +165,7 @@ Resources:
             Version: 2012-10-17
             Statement:
               -
-                Sid: IAMPermissions
+                Sid: AdditionalPermissions
                 Effect: Allow
                 Action:
                 - iam:Create*
@@ -194,7 +194,21 @@ Resources:
                 - events:*
                 - lambda:*
                 Resource: "*"
-
+              -
+                Sid: LambdaInvoke
+                Effect: Allow
+                Action:
+                - lambda:InvokeFunction
+                Resource:
+                  Fn::ImportValue: !Sub ${LZStackPrefix}-lambda-listener-priority
+              -
+                Sid: Ec2SG
+                Effect: Allow
+                Action:
+                - ec2:CreateSecurityGroup
+                - ec2:DescribeSecurityGroups
+                - ec2:DeleteSecurityGroup
+                Resource: "*"
 
   ServiceManagerPipeline:
     Type: AWS::CodePipeline::Pipeline
