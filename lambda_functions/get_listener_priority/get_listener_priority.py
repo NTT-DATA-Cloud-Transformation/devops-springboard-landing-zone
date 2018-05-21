@@ -112,7 +112,7 @@ def lambda_handler(event, context):
         locked = False
         priority = get_empty_slot()
         while (not locked):
-            locked = aquire_lock(table, 15000, caller, priority)
+            locked = aquire_lock(table, 30000, caller, priority)
             time.sleep(1)
             priority = get_empty_slot()
             if (has_timed_out(timestamp)):
