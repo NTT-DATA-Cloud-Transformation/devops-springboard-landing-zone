@@ -192,6 +192,7 @@ Resources:
                 - sns:*
                 - ecr:*
                 - events:*
+                - lambda:*
                 Resource: "*"
 
 
