@@ -273,7 +273,7 @@ Resources:
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: !Sub ${StackPrefix}-network
               RunOrder: '3'
-        - Name: ECSStackDeploy
+        - Name: ECSStackAnchoreDBStackDeploy
           Actions:
             - Name: CreateChangeSetECSCluster
               ActionTypeId:
@@ -310,8 +310,6 @@ Resources:
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: !Sub ${StackPrefix}-cluster
               RunOrder: '3'
-        # - Name: AnchoreDBStackDeploy
-          # Actions:
             - Name: CreateChangeSetAnchoreDB
               ActionTypeId:
                 Category: Deploy
