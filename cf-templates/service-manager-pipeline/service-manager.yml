@@ -29,10 +29,6 @@ Parameters:
     Description: 'GitHub Access Token'
     Type: 'String'
     NoEcho: true
-  PipelineSNSTopic:
-    Description: "Pipeline SNS Topic Arn"
-    Type: String
-
 
 Resources:
   TemplateBucket:
@@ -63,7 +59,9 @@ Resources:
             - FetchFromGit
             - DeployToServiceCatalog
       Targets:
-      - Arn: !Ref PipelineSNSTopic
+      - Arn:
+          Fn::ImportValue:
+            !Sub ${StackPrefix}-pipeline-sns-topic
         Id: PipelineNoticationSNS
         InputTransformer:
           InputPathsMap:
@@ -231,7 +229,7 @@ Resources:
                 Action:
                 - lambda:InvokeFunction
                 Resource:
-                  Fn::ImportValue: !Sub ${LZStackPrefix}-lambda-listener-priority
+                  Fn::ImportValue: !Sub ${StackPrefix}-lambda-listener-priority
               -
                 Sid: Ec2SG
                 Effect: Allow
