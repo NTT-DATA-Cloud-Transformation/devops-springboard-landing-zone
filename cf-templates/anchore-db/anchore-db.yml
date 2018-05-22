@@ -191,6 +191,7 @@ Resources:
       MasterUserPassword: !GetAtt GeneratePassword.Password
       DBSubnetGroupName: !Ref DBSubnetGroup
       DBParameterGroupName: !Ref DBParamGroup
+      StorageType: gp2
       VPCSecurityGroups:
       - !GetAtt DBEC2SecurityGroup.GroupId
       Tags:

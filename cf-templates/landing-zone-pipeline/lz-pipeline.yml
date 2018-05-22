@@ -10,7 +10,6 @@ Metadata:
           - Label:
               default: "CodePipeline Configuration"
             Parameters:
-              - TemplatesBucket
               - StackPrefix
               - NotifyEmail
           - Label:
@@ -19,11 +18,9 @@ Metadata:
               - GitUser
               - GitRepo
               - GitBranch
+              - GitHubToken
 
 Parameters:
-  TemplatesBucket:
-    Description: S3 bucket to which nested CF templates are synced
-    Type: String
   StackPrefix:
     Description: Stack Prefix
     Type: String
@@ -39,12 +36,19 @@ Parameters:
   GitBranch:
     Description: 'Git Branch being deployed'
     Type: 'String'
+  GitHubToken:
+    Description: 'GitHub Access Token'
+    Type: 'String'
+    NoEcho: true
   NotifyEmail:
     Type: String
-    Description: Email for  Landing Zone  administrators
+    Description: Email for  Landing Zone  Pipeline Notifications
 
 
 Resources:
+  LZArtifactBucket:
+    Type: "AWS::S3::Bucket"
+
   CFNRole:
     Type: AWS::IAM::Role
     Properties:
@@ -134,8 +138,7 @@ Resources:
             - FetchFromGit
             - IAMStackDeploy
             - NetworkStackDeploy
-            - ECSStackDeploy
-            - AnchoreDBStackDeploy
+            - ClusterResourcesDeploy
             - ServiceManagerStackDeploy
 
       Targets:
@@ -169,7 +172,7 @@ Resources:
     Properties:
       ArtifactStore:
         #EncryptionKey: !Ref KMSKeyId
-        Location: !Ref TemplatesBucket
+        Location: !Ref LZArtifactBucket
         Type: S3
       DisableInboundStageTransitions: []
       RestartExecutionOnUpdate: true
@@ -181,12 +184,14 @@ Resources:
             - Name: TemplateSource
               ActionTypeId:
                 Category: Source
-                Owner: AWS
-                Provider: S3
+                Owner: ThirdParty
+                Provider: GitHub
                 Version: '1'
               Configuration:
-                S3Bucket: !Ref TemplatesBucket
-                S3ObjectKey: !Sub ${GitUser}/${GitRepo}/branch/${GitBranch}/${GitUser}_${GitRepo}_branch_${GitBranch}.zip
+                Owner: !Ref GitUser
+                Repo: !Ref GitRepo
+                Branch: !Ref GitBranch
+                OAuthToken: !Ref GitHubToken
                 PollForSourceChanges: true
               OutputArtifacts:
                 - Name: S3Artifact
@@ -265,7 +270,7 @@ Resources:
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: !Sub ${StackPrefix}-network
               RunOrder: '3'
-        - Name: ECSStackDeploy
+        - Name: ClusterResourcesDeploy
           Actions:
             - Name: CreateChangeSetECSCluster
               ActionTypeId:
@@ -301,9 +306,7 @@ Resources:
                 ChangeSetName: !Sub ${StackPrefix}-cluster-changeset
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: !Sub ${StackPrefix}-cluster
-              RunOrder: '3'
-        - Name: AnchoreDBStackDeploy
-          Actions:
+              RunOrder: '2'
             - Name: CreateChangeSetAnchoreDB
               ActionTypeId:
                 Category: Deploy
@@ -338,7 +341,7 @@ Resources:
                 ChangeSetName: !Sub ${StackPrefix}-anchore-db-changeset
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: !Sub ${StackPrefix}-anchore-db
-              RunOrder: '3'
+              RunOrder: '2'
         - Name: ServiceManagerStackDeploy
           Actions:
             - Name: ServiceManagerCreateChangeSet
@@ -361,9 +364,9 @@ Resources:
                   !Sub |
                     {
                       "GitUser": "${GitUser}",
-                      "ArtifactBucketName": "${TemplatesBucket}",
                       "PipelineIamRoleArn": "${PipelineRole.Arn}",
-                      "StackPrefix": "${StackPrefix}"
+                      "StackPrefix": "${StackPrefix}",
+                      "GitHubToken": "${GitHubToken}"
                     }
               RunOrder: '1'
             - Name: ServiceManagerExecuteChangeSet
@@ -379,4 +382,14 @@ Resources:
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: !Sub ${StackPrefix}-service-manager
               RunOrder: '3'
-
+Outputs:
+  PipelineSNSTopic:
+    Description: SNS Topic for pipeline notifications
+    Value: !Ref PipelineSNSTopic
+    Export:
+      Name: !Sub ${StackPrefix}-pipeline-sns-topic
+  LandingZoneArtifactBucket:
+    Description: S3 bucket to store landing zone repo artifacts
+    Value: !Ref LZArtifactBucket
+    Export:
+      Name: !Sub ${StackPrefix}-lz-artifact-bucket
