@@ -366,8 +366,7 @@ Resources:
                       "GitUser": "${GitUser}",
                       "PipelineIamRoleArn": "${PipelineRole.Arn}",
                       "StackPrefix": "${StackPrefix}",
-                      "GitHubToken": "${GitHubToken}",
-                      "PipelineSNSTopic": "${PipelineSNSTopic}"
+                      "GitHubToken": "${GitHubToken}"
                     }
               RunOrder: '1'
             - Name: ServiceManagerExecuteChangeSet
