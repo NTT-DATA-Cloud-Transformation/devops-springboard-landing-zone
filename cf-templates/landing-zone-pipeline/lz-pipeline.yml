@@ -364,7 +364,7 @@ Resources:
                   !Sub |
                     {
                       "GitUser": "${GitUser}",
-                      "GitHubToken: "${GitHubToken}
+                      "GitHubToken": "${GitHubToken}",
                       "PipelineIamRoleArn": "${PipelineRole.Arn}",
                       "StackPrefix": "${StackPrefix}"
                     }
