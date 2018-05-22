@@ -58,12 +58,11 @@ Resources:
             - !Ref ServiceManagerPipeline
           stage:
             - FetchFromGit
-            - DeployToServiceCatalog';
-
-
+            - DeployToServiceCatalog
       Targets:
       - Arn:
-          Fn::ImportValue: !Sub ${StackPrefix}-pipeline-sns-topic
+          Fn::ImportValue:
+            !Sub ${StackPrefix}-pipeline-sns-topic
         Id: PipelineNoticationSNS
         InputTransformer:
           InputPathsMap:
