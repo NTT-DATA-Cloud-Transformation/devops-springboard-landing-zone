@@ -37,7 +37,7 @@ Parameters:
     Description: 'Git Branch being deployed'
     Type: 'String'
   GitHubToken:
-    Description: 'OAuth Token for repo access'
+    Description: 'GitHub Access Token'
     Type: 'String'
     NoEcho: true
   NotifyEmail:
@@ -192,8 +192,6 @@ Resources:
                 Repo: !Ref GitRepo
                 Branch: !Ref GitBranch
                 OAuthToken: !Ref GitHubToken
-                # S3Bucket: !Ref TemplatesBucket
-                # S3ObjectKey: !Sub ${GitUser}/${GitRepo}/branch/${GitBranch}/${GitUser}_${GitRepo}_branch_${GitBranch}.zip
                 PollForSourceChanges: true
               OutputArtifacts:
                 - Name: S3Artifact
@@ -367,7 +365,6 @@ Resources:
                     {
                       "GitUser": "${GitUser}",
                       "GitHubToken: "${GitHubToken}
-                      "ArtifactBucketName": "${TemplatesBucket}",
                       "PipelineIamRoleArn": "${PipelineRole.Arn}",
                       "StackPrefix": "${StackPrefix}"
                     }

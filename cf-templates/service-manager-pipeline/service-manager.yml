@@ -13,9 +13,6 @@ Parameters:
   ServiceBucketPath:
     Type: String
     Description: Path along the bucket where we'll put the templates
-  ArtifactBucketName:
-    Type: String
-    Description: Name for bucket being used to read the artifacts
   PipelineIamRoleArn:
     Type: String
     Description: Arn of role to use for managing this pipeline
@@ -29,7 +26,7 @@ Parameters:
     Description: 'Branch being deployed'
     Type: 'String'
   GitHubToken:
-    Description: 'OAuth Token for repo access'
+    Description: 'GitHub Access Token'
     Type: 'String'
     NoEcho: true
 
@@ -62,7 +59,7 @@ Resources:
           stage:
             - FetchFromGit
             - DeployToServiceCatalog';
-            
+
 
       Targets:
       - Arn:
@@ -136,7 +133,7 @@ Resources:
                 Action:
                   - s3:GetObject
                 Resource:
-                  - !Sub 'arn:aws:s3:::${ArtifactBucketName}/*'
+                  - !Sub 'arn:aws:s3:::${ArtifactBucket}/*'
       ManagedPolicyArns:
            - arn:aws:iam::aws:policy/AWSServiceCatalogAdminFullAccess
            - arn:aws:iam::aws:policy/AmazonS3FullAccess
@@ -249,7 +246,7 @@ Resources:
     Properties:
       Name: !Sub ${StackPrefix}-service-manager-pipeline
       ArtifactStore:
-        Location: !Ref ArtifactBucketName
+        Location: !Ref ArtifactBucket
         Type: 'S3'
       RoleArn: !Ref PipelineIamRoleArn
       Stages:
