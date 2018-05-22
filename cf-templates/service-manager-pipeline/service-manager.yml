@@ -29,6 +29,9 @@ Parameters:
     Description: 'GitHub Access Token'
     Type: 'String'
     NoEcho: true
+  PipelineSNSTopic:
+    Description: "Pipeline SNS Topic Arn"
+    Type: String
 
 
 Resources:
@@ -60,9 +63,7 @@ Resources:
             - FetchFromGit
             - DeployToServiceCatalog
       Targets:
-      - Arn:
-          Fn::ImportValue:
-            !Sub ${StackPrefix}-pipeline-sns-topic
+      - Arn: !Ref PipelineSNSTopic
         Id: PipelineNoticationSNS
         InputTransformer:
           InputPathsMap:

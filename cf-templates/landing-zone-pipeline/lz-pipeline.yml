@@ -364,9 +364,10 @@ Resources:
                   !Sub |
                     {
                       "GitUser": "${GitUser}",
-                      "GitHubToken": "${GitHubToken}",
                       "PipelineIamRoleArn": "${PipelineRole.Arn}",
-                      "StackPrefix": "${StackPrefix}"
+                      "StackPrefix": "${StackPrefix}",
+                      "GitHubToken": "${GitHubToken}",
+                      "PipelineSNSTopic": "${PipelineSNSTopic}"
                     }
               RunOrder: '1'
             - Name: ServiceManagerExecuteChangeSet
@@ -388,3 +389,8 @@ Outputs:
     Value: !Ref PipelineSNSTopic
     Export:
       Name: !Sub ${StackPrefix}-pipeline-sns-topic
+  LandingZoneArtifactBucket:
+    Description: S3 bucket to store landing zone repo artifacts
+    Value: !Ref LZArtifactBucket
+    Export:
+      Name: !Sub ${StackPrefix}-lz-artifact-bucket
