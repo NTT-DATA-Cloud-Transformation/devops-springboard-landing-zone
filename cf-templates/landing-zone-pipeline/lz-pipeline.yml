@@ -10,7 +10,6 @@ Metadata:
           - Label:
               default: "CodePipeline Configuration"
             Parameters:
-              - TemplatesBucket
               - StackPrefix
               - NotifyEmail
           - Label:
@@ -19,11 +18,9 @@ Metadata:
               - GitUser
               - GitRepo
               - GitBranch
+              - GitHubToken
 
 Parameters:
-  TemplatesBucket:
-    Description: S3 bucket to which nested CF templates are synced
-    Type: String
   StackPrefix:
     Description: Stack Prefix
     Type: String
@@ -45,10 +42,13 @@ Parameters:
     NoEcho: true
   NotifyEmail:
     Type: String
-    Description: Email for  Landing Zone  administrators
+    Description: Email for  Landing Zone  Pipeline Notifications
 
 
 Resources:
+  LZArtifactBucket:
+    Type: "AWS::S3::Bucket"
+
   CFNRole:
     Type: AWS::IAM::Role
     Properties:
@@ -138,8 +138,7 @@ Resources:
             - FetchFromGit
             - IAMStackDeploy
             - NetworkStackDeploy
-            - ECSStackDeploy
-            - AnchoreDBStackDeploy
+            - ClusterResourcesDeploy
             - ServiceManagerStackDeploy
 
       Targets:
@@ -173,7 +172,7 @@ Resources:
     Properties:
       ArtifactStore:
         #EncryptionKey: !Ref KMSKeyId
-        Location: !Ref TemplatesBucket
+        Location: !Ref LZArtifactBucket
         Type: S3
       DisableInboundStageTransitions: []
       RestartExecutionOnUpdate: true
@@ -273,7 +272,7 @@ Resources:
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: !Sub ${StackPrefix}-network
               RunOrder: '3'
-        - Name: ECSStackAnchoreDBStackDeploy
+        - Name: ClusterResourcesDeploy
           Actions:
             - Name: CreateChangeSetECSCluster
               ActionTypeId:
@@ -309,7 +308,7 @@ Resources:
                 ChangeSetName: !Sub ${StackPrefix}-cluster-changeset
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: !Sub ${StackPrefix}-cluster
-              RunOrder: '3'
+              RunOrder: '2'
             - Name: CreateChangeSetAnchoreDB
               ActionTypeId:
                 Category: Deploy
@@ -344,7 +343,7 @@ Resources:
                 ChangeSetName: !Sub ${StackPrefix}-anchore-db-changeset
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: !Sub ${StackPrefix}-anchore-db
-              RunOrder: '3'
+              RunOrder: '2'
         - Name: ServiceManagerStackDeploy
           Actions:
             - Name: ServiceManagerCreateChangeSet
@@ -367,6 +366,7 @@ Resources:
                   !Sub |
                     {
                       "GitUser": "${GitUser}",
+                      "GitHubToken: "${GitHubToken}
                       "ArtifactBucketName": "${TemplatesBucket}",
                       "PipelineIamRoleArn": "${PipelineRole.Arn}",
                       "StackPrefix": "${StackPrefix}"
@@ -385,4 +385,9 @@ Resources:
                 RoleArn: !GetAtt CFNRole.Arn
                 StackName: !Sub ${StackPrefix}-service-manager
               RunOrder: '3'
-
+Outputs:
+  PipelineSNSTopic:
+    Description: SNS Topic for pipeline notifications
+    Value: !Ref PipelineSNSTopic
+    Export:
+      Name: !Sub ${StackPrefix}-pipeline-sns-topic

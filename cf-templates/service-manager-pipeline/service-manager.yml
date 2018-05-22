@@ -28,17 +28,51 @@ Parameters:
   GitBranch:
     Description: 'Branch being deployed'
     Type: 'String'
+  GitHubToken:
+    Description: 'OAuth Token for repo access'
+    Type: 'String'
+    NoEcho: true
 
 
 Resources:
   TemplateBucket:
     Type: "AWS::S3::Bucket"
 
+  ResourceBucket:
+    Type: "AWS::S3::Bucket"
+
   ArtifactBucket:
     Type: "AWS::S3::Bucket"
 
-  ResourceBucket:
-    Type: "AWS::S3::Bucket"
+  PiplineCloudwatchRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: "Cloudwatch events rule to detect pipeline failures"
+      State: "ENABLED"
+      EventPattern:
+        source:
+        - "aws.codepipeline"
+        detail-type:
+        - "CodePipeline Stage Execution State Change"
+        detail:
+          state:
+            - "FAILED"
+          pipeline:
+            - !Ref ServiceManagerPipeline
+          stage:
+            - FetchFromGit
+            - DeployToServiceCatalog';
+            
+
+      Targets:
+      - Arn:
+          Fn::ImportValue: !Sub ${StackPrefix}-pipeline-sns-topic
+        Id: PipelineNoticationSNS
+        InputTransformer:
+          InputPathsMap:
+            pipeline: $.detail.pipeline
+            stage: $.detail.stage
+          InputTemplate: !Sub '"The Stage <stage> in Pipeline <pipeline> has failed."'
 
   BuildIamRole:
     Type: AWS::IAM::Role
@@ -224,12 +258,14 @@ Resources:
             - Name: TemplateSource
               ActionTypeId:
                 Category: Source
-                Owner: AWS
-                Provider: S3
+                Owner: ThirdParty
+                Provider: GitHub
                 Version: '1'
               Configuration:
-                S3Bucket: !Ref ArtifactBucketName
-                S3ObjectKey: !Sub ${GitUser}/${GitRepo}/branch/${GitBranch}/${GitUser}_${GitRepo}_branch_${GitBranch}.zip
+                Owner: !Ref GitUser
+                Repo: !Ref GitRepo
+                Branch: !Ref GitBranch
+                OAuthToken: !Ref GitHubToken
                 PollForSourceChanges: true
               OutputArtifacts:
                 - Name: S3Artifact
@@ -247,7 +283,7 @@ Resources:
                 ProjectName: !Ref BuildProject
               InputArtifacts: [Name: 'S3Artifact']
               OutputArtifacts: [Name: 'BuildOutput']
-              RunOrder: 20
+              RunOrder: 1
 
   LambdaCleanInput:
     Type: "AWS::Lambda::Function"
