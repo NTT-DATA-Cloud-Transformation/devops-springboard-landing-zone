@@ -356,7 +356,9 @@ Resources:
       InstanceType:
         Ref: EcsInstanceType
       AssociatePublicIpAddress: true
-      IamInstanceProfile: !Sub "${StackPrefix}-EcsInstanceProfile"
+      IamInstanceProfile:
+        Fn::ImportValue:
+              !Sub ${StackPrefix}-ecs-instance-profile
       KeyName:
         Fn::If:
         - CreateEC2LCWithKeyPair

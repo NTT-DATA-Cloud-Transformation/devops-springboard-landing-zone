@@ -31,7 +31,7 @@ Resources:
       Path: '/'
       Roles:
       - Ref: ECSInstanceIAMRole
-      InstanceProfileName: !Sub "${StackPrefix}-EcsInstanceProfile"
+
   EcsServiceRole:
     Type: AWS::IAM::Role
     Properties:
@@ -92,4 +92,11 @@ Outputs:
     Value: !GetAtt ECSInstanceIAMRole.Arn
     Export:
       Name: !Sub ${StackPrefix}-ecs-instance-role-arn
-
+  EC2InstanceProfile:
+    Value: !Ref ECSInstanceProfile
+    Export:
+      Name: !Sub ${StackPrefix}-ecs-instance-profile
+  EC2InstanceProfileArn:
+    Value: !GetAtt ECSInstanceProfile.Arn
+    Export:
+      Name: !Sub ${StackPrefix}-ecs-instance-profile-arn
