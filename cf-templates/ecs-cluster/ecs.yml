@@ -56,6 +56,38 @@ Parameters:
     Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
     Default: "/aws/service/ecs/optimized-ami/amazon-linux/recommended/image_id"
 
+Mappings:
+  FargateAvailability:
+    us-east-1:
+      Value: FARGATE
+    us-east-2:
+      Value: FARGATE
+    us-west-2:
+      Value: FARGATE
+    us-west-1:
+      Value: EC2
+    ca-central-1:
+      Value: EC2
+    eu-west-1:
+      Value: FARGATE
+    eu-west-2:
+      Value: EC2
+    eu-west-3:
+      Value: EC2
+    eu-central-1:
+      Value: EC2
+    ap-northeast-1:
+      Value: EC2
+    ap-northeast-2:
+      Value: EC2
+    ap-southeast-1:
+      Value: EC2
+    ap-southeast-2:
+      Value: EC2
+    ap-south-1:
+      Value: EC2
+    sa-east-1:
+      Value: EC2
 Conditions:
   CreateEC2LCWithKeyPair:
     Fn::Not:
@@ -63,8 +95,10 @@ Conditions:
       - Ref: KeyName
       - ''
   #Use Ec2 for regions where fargate is not available
-  #TODO Refine this as and when fargate becomes available in more regions
-  EC2: !Not [!Equals [ !Ref "AWS::Region", "us-east-1" ]]
+  EC2:
+    Fn::Equals:
+    - !FindInMap [FargateAvailability, !Ref "AWS::Region", "Value"]
+    - "EC2"
 
 Resources:
   LambdaExecRole:
