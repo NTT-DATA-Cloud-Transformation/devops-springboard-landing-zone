@@ -22,6 +22,8 @@ This repository contains the templates to create landing-zone resources for devo
     * [An ECS Cluster](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ECS_clusters.html)
     * An [autoscaling group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/AutoScalingGroup.html) to run containers if [Fargate](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/AWS_Fargate.html) is not available
     * An RDS instance for [anchore-engine](https://anchore.com/) as a persistent store.
+* **Service Manager Pipeline**
+This is a CodePipeline which detects changes made to service deployment pipeline in [devops-springboard-pipelines](https://github.com/Flux7Labs/devops-springboard-pipelines) repository and creates or updates Service Catalog Products.
 
 ## Landing Zone Architecture
 Following diagram describes landing zone architecture
