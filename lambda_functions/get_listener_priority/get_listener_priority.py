@@ -51,7 +51,7 @@ def prune_expired_lock(table, priority='0'):
     return True
 
 
-def aquire_lock(table, waitms, caller, priority):
+def acquire_lock(table, waitms, caller, priority):
     prune_expired_lock(table, priority)
     expire_ts = timestamp_millis() + waitms
     try:
@@ -112,7 +112,7 @@ def lambda_handler(event, context):
         locked = False
         priority = get_empty_slot()
         while (not locked):
-            locked = aquire_lock(table, 30000, caller, priority)
+            locked = acquire_lock(table, 30000, caller, priority)
             time.sleep(1)
             priority = get_empty_slot()
             if (has_timed_out(timestamp)):
